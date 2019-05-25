@@ -408,6 +408,7 @@ authentication = {
                     }
 
                     return models.User.add({
+                        rc_id: '12345678912345678',
                         email: data.email,
                         name: data.name,
                         password: data.password,

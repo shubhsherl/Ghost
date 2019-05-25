@@ -28,7 +28,7 @@ const http = (apiImpl) => {
                 id: req.api_key.get('integration_id')
             };
         }
-
+        
         // NOTE: "external user" is only used in the subscriber app. External user is ID "0".
         if ((req.user && req.user.id) || (req.user && models.User.isExternalUser(req.user.id))) {
             user = req.user.id;
@@ -82,6 +82,7 @@ const http = (apiImpl) => {
 
                 if (apiImpl.response && apiImpl.response.format === 'plain') {
                     debug('plain text response');
+
                     return res.send(result);
                 }
 
@@ -93,7 +94,7 @@ const http = (apiImpl) => {
                     docName: frame.docName,
                     method: frame.method
                 };
-
+                
                 next(err);
             });
     };
