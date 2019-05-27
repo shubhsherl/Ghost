@@ -5,7 +5,11 @@ const models = require('../../../models');
 
 module.exports = async function getRCUsers(apiUrl, header) {
     const options = { context: { internal: true } };
-
+    let author_id;
+    models.Role.findOne({name: 'Author'})
+        .then((role)=>{
+            author_id = role.id;
+        });
     return new Promise((resolve) => {
         let users, offset = 0, total = 1, count = 10;
         let fetched = false;
@@ -16,7 +20,6 @@ module.exports = async function getRCUsers(apiUrl, header) {
                     total = result.total;
                     //offset += result.count;
                     users = result.users;
-                    console.log(result.users[0]);
                     // Check if RC gives admin callee result.
                     // if (users && users[0] && !users[0].password) {
                     //     throw new common.errors.InternalServerError({message: 'Doesnot have admin access in RC.'});    
@@ -26,7 +29,7 @@ module.exports = async function getRCUsers(apiUrl, header) {
                             .then((u) => {
                                 // Don't save if User is already in the DB.
                                 if (!u) 
-                                    saveUser(user, options);
+                                    saveUser(user, author_id, options);
                             });
                     });
                 } else {
@@ -39,7 +42,7 @@ module.exports = async function getRCUsers(apiUrl, header) {
     })
 };
 
-function saveUser(user, options) {
+function saveUser(user, role, options) {
     // let email = user.emails[0].address;
     // user.emails.foreach((e)=>{
     //     if (e.verified) {
@@ -51,7 +54,7 @@ function saveUser(user, options) {
         email: user._id + '@g.com',
         name: user.name,
         password: '$2a$10$etxjjsdeTbUC7aG3Od2/EuMUY4iqqXEV4jF0MtXSfsL2RmwJT3Jjm',//user.password.bcrypt,
-        roles: ['5ce927a694a0da53b54c24e8']
+        roles: [role]// @TODO add author role_id
     }, options);
 }
 
