@@ -6,6 +6,7 @@ const path = require('path');
 const config = require('../../config');
 const models = require('../../models');
 const urlService = require('../../services/url');
+const rcUtils = require('./utils/rc-utils');
 const common = require('../../lib/common');
 const settingsCache = require('../../services/settings/cache');
 
@@ -116,24 +117,70 @@ module.exports = {
                 return setting.key === 'type';
             });
 
+            let isAnnounce = frame.data.settings.find((setting) => {
+                return setting.key === 'is_announced';
+            });
+
+            if (_.isObject(isAnnounce)) {
+                isAnnounce = isAnnounce.value;
+            }
+
             const errors = [];
 
-            _.each(frame.data.settings, (setting) => {
-                const settingFromCache = settingsCache.get(setting.key, {resolve: false});
-
-                if (!settingFromCache) {
-                    errors.push(new common.errors.NotFoundError({
-                        message: common.i18n.t('errors.api.settings.problemFindingSetting', {
-                            key: setting.key
-                        })
-                    }));
-                } else if (settingFromCache.type === 'core' && !(frame.options.context && frame.options.context.internal)) {
-                    // @TODO: handle in settings model permissible fn
-                    errors.push(new common.errors.NoPermissionError({
-                        message: common.i18n.t('errors.api.settings.accessCoreSettingFromExtReq')
-                    }));
+            if(isAnnounce) {
+                let room = frame.data.settings.find((setting) => {
+                    return setting.key === 'room';
+                });
+    
+                if (_.isObject(room)) {
+                    room = room.value;
                 }
-            });
+
+                if(!room) {
+                    errors.push(new common.errors.NotFoundError({
+                        message: "Room Name should not be empty"
+                    }));
+                } else {
+                    let header = {
+                        'X-Auth-Token': 'AQlnaFgDczayLPngn-HdHABIomE2EjV_LMHAW0lvV1X',
+                        'X-User-Id': 'AZG7dyTXMJoPhJHE7'
+                    };
+                    return rcUtils.validateRoom('https://open.rocket.chat/api/v1/rooms.info', header, room)
+                        .then((r, err)=>{
+                            if(err) {
+                                errors.push(err);
+                            } else if(!r || !r.exist) {
+                                errors.push(new common.errors.NotFoundError({
+                                    message: "Room not found, enter a Valid room name"
+                                }));
+                            } else if(r.name === room) {
+                                frame.data.settings.push({key: 'room_id', value: r.rid});
+                            }
+                            _.each(frame.data.settings, (setting) => {
+                                const settingFromCache = settingsCache.get(setting.key, {resolve: false});
+                
+                                if (!settingFromCache) {
+                                    errors.push(new common.errors.NotFoundError({
+                                        message: common.i18n.t('errors.api.settings.problemFindingSetting', {
+                                            key: setting.key
+                                        })
+                                    }));
+                                } else if (settingFromCache.type === 'core' && !(frame.options.context && frame.options.context.internal)) {
+                                    // @TODO: handle in settings model permissible fn
+                                    errors.push(new common.errors.NoPermissionError({
+                                        message: common.i18n.t('errors.api.settings.accessCoreSettingFromExtReq')
+                                    }));
+                                }
+                            });
+                            
+                            if (errors.length) {
+                                return Promise.reject(errors[0]);
+                            }
+                
+                            return models.Settings.edit(frame.data.settings, frame.options);
+                        })
+                }
+            }
 
             if (errors.length) {
                 return Promise.reject(errors[0]);

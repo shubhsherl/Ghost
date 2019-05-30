@@ -4,7 +4,7 @@ const security = require('../../lib/security');
 const mailService = require('../../services/mail');
 const urlService = require('../../services/url');
 const settingsCache = require('../../services/settings/cache');
-const getRCUsers = require('./utils/rc-users');
+const rcUtils = require('./utils/rc-utils');
 const models = require('../../models');
 const api = require('./index');
 const ALLOWED_INCLUDES = [];
@@ -111,7 +111,7 @@ module.exports = {
                 'X-Auth-Token': 'AQlnaFgDczayLPngn-HdHABIomE2EjV_LMHAW0lvV1X',
                 'X-User-Id': 'AZG7dyTXMJoPhJHE7'
             };
-            getRCUsers('https://open.rocket.chat/api/v1/users.list', header)
+            rcUtils.getRCUsers('https://open.rocket.chat/api/v1/users.list', header)
                 .then((body)=>{
                     users = body;
                     console.log("users");
@@ -213,7 +213,7 @@ module.exports = {
                 'X-Auth-Token': 'AQlnaFgDczayLPngn-HdHABIomE2EjV_LMHAW0lvV1X',
                 'X-User-Id': 'AZG7dyTXMJoPhJHE7'
             };
-            getRCUsers('https://open.rocket.chat/api/v1/users.list', header);
+            rcUtils.getRCUsers('https://open.rocket.chat/api/v1/users.list', header);
             return;
             // CASE: ensure we destroy the invite before
             // return models.Invite.findOne({email: frame.data.invites[0].email}, frame.options)

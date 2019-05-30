@@ -106,6 +106,42 @@
             "defaultValue": "casper"
         }
     },
+    "rc_settings": {
+        "room": {
+            "defaultValue": "articles",
+            "validations": {
+                "isLength": {
+                    "max": 150
+                }
+            }
+        },
+        "room_id": {
+            "defaultValue": "ridOfAboveRoom",
+            "validations": {
+                "isLength": {
+                    "max": 17
+                }
+            }
+        },
+        "is_announced": {
+            "defaultValue": "false",
+            "validations": {
+                "isIn": [["true", "false"]]
+            }
+        },
+        "is_authors_rooms": {
+            "defaultValue": "false",
+            "validations": {
+                "isIn": [["true", "false"]]
+            }
+        },
+        "is_comments": {
+            "defaultValue": "false",
+            "validations": {
+                "isIn": [["true", "false"]]
+            }
+        }
+    },
     "private": {
         "is_private": {
             "defaultValue": "false",

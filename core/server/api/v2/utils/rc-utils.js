@@ -3,7 +3,31 @@ const request = require('request');
 const common = require('../../../lib/common');
 const models = require('../../../models');
 
-module.exports = async function getRCUsers(apiUrl, header) {
+function saveUser(user, role, options) {
+    // let email = user.emails[0].address;
+    // user.emails.foreach((e)=>{
+    //     if (e.verified) {
+    //         email = e.address;
+    //     }
+    // });
+    return models.User.add({
+        rc_id: user._id,
+        email: user._id + '@g.com',
+        name: user.name,
+        password: '$2a$10$etxjjsdeTbUC7aG3Od2/EuMUY4iqqXEV4jF0MtXSfsL2RmwJT3Jjm',//user.password.bcrypt,
+        roles: [role]// @TODO add author role_id
+    }, options);
+}
+
+function buidApiUrl(base, offset, count) {
+    return base + '?' + `offset=${offset}&count=${count}`;
+}
+
+function buildRoomQuery(base, room) {
+    return base + '?' + `roomName=${room}&fields={"_id":1,"name":1}`;
+}
+
+exports.getRCUsers = async function getRCUsers(apiUrl, header) {
     const options = { context: { internal: true } };
     let author_id;
     models.Role.findOne({name: 'Author'})
@@ -40,24 +64,29 @@ module.exports = async function getRCUsers(apiUrl, header) {
         }
         resolve(fetched);
     })
-};
-
-function saveUser(user, role, options) {
-    // let email = user.emails[0].address;
-    // user.emails.foreach((e)=>{
-    //     if (e.verified) {
-    //         email = e.address;
-    //     }
-    // });
-    return models.User.add({
-        rc_id: user._id,
-        email: user._id + '@g.com',
-        name: user.name,
-        password: '$2a$10$etxjjsdeTbUC7aG3Od2/EuMUY4iqqXEV4jF0MtXSfsL2RmwJT3Jjm',//user.password.bcrypt,
-        roles: [role]// @TODO add author role_id
-    }, options);
 }
 
-function buidApiUrl(base, offset, count) {
-    return base + '?' + `offset=${offset}&count=${count}`;
+
+exports.validateRoom = async function validateRoom(apiUrl, header, roomName) {
+    let room;
+    return new Promise((resolve) => {
+        request.get({ url: buildRoomQuery(apiUrl, roomName), headers: header }, function (e, r, body) {
+            result = JSON.parse(body);
+            if (result.success) {
+                r = result.room
+                room = {
+                    exist: true,
+                    rid: r._id,
+                    name: r.name
+                }
+            } else {
+                room = {
+                    exist: false,
+                }
+            }
+            resolve(room);
+        });
+    });
 }
+
+
