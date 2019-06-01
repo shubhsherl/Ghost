@@ -108,7 +108,7 @@ module.exports = {
             let users;
             // let emailData;
             let header = {
-                'X-Auth-Token': 'AQlnaFgDczayLPngn-HdHABIomE2EjV_LMHAW0lvV1X',
+                'X-Auth-Token': 'Snhsgh5Q_q6y-ZlhGaN9AIbzN8iGCZEzfLAXNU9Y29G',
                 'X-User-Id': 'AZG7dyTXMJoPhJHE7'
             };
             rcUtils.getRCUsers('https://open.rocket.chat/api/v1/users.list', header)

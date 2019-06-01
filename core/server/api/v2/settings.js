@@ -142,7 +142,7 @@ module.exports = {
                     }));
                 } else {
                     let header = {
-                        'X-Auth-Token': 'AQlnaFgDczayLPngn-HdHABIomE2EjV_LMHAW0lvV1X',
+                        'X-Auth-Token': 'Snhsgh5Q_q6y-ZlhGaN9AIbzN8iGCZEzfLAXNU9Y29G',
                         'X-User-Id': 'AZG7dyTXMJoPhJHE7'
                     };
                     return rcUtils.validateRoom('https://open.rocket.chat/api/v1/rooms.info', header, room)

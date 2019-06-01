@@ -140,6 +140,12 @@
             "validations": {
                 "isIn": [["true", "false"]]
             }
+        },
+        "invite_only": {
+            "defaultValue": "false",
+            "validations": {
+                "isIn": [["true", "false"]]
+            }
         }
     },
     "private": {

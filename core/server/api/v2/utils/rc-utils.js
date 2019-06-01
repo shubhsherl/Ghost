@@ -57,7 +57,9 @@ exports.getRCUsers = async function getRCUsers(apiUrl, header) {
                             });
                     });
                 } else {
-                    throw new common.errors.InternalServerError({ message: 'Unable to add users from RC.' });
+                    return Promise.reject(new common.errors.InternalServerError({
+                        message: 'Unable to add user from RC'
+                    }));
                 }
             });
             offset = 1;

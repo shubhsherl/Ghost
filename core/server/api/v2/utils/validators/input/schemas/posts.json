@@ -17,6 +17,13 @@
                     "type": "string",
                     "maxLength": 191
                 },
+                "room_name": {
+                    "type": ["string", "null"],
+                    "maxLength": 980
+                },
+                "to_announce": {
+                    "type": "boolean"
+                },
                 "mobiledoc": {
                     "type": ["string", "null"],
                     "maxLength": 1000000000
