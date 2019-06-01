@@ -1,5 +1,6 @@
 const express = require('express');
 const api = require('../../../../api');
+const cors = require('cors');
 const apiv2 = require('../../../../api/v2');
 const mw = require('./middleware');
 
@@ -16,7 +17,11 @@ module.exports = function apiRoutes() {
     router.del = router.delete;
 
     // ## CORS pre-flight check
-    router.options('*', shared.middlewares.api.cors);
+    // router.options('*', shared.middlewares.api.cors);
+
+    // ## Allow CORS
+    router.options('*', cors());
+
 
     const http = apiv2.http;
 

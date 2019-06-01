@@ -21,7 +21,8 @@ const validate = (schema, definition, data) => {
     const validation = getValidation(schema, definition);
 
     validation(data);
-
+    
+    // console.log(data);
     if (validation.errors) {
         let key;
         const dataPath = _.get(validation, 'errors[0].dataPath');
