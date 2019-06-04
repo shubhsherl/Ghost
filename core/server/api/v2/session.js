@@ -1,11 +1,8 @@
 const Promise = require('bluebird');
-const request = require('request');
 const common = require('../../lib/common');
 const models = require('../../models');
 const rcUtils = require('../v2/utils/rc-utils');
 const auth = require('../../services/auth');
-
-const rcApi = "https://open.rocket.chat/api/v1/me";
 
 const session = {
     read(options) {

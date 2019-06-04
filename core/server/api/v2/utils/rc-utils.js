@@ -1,8 +1,8 @@
 const Promise = require('bluebird');
 const request = require('request');
 const { forEach } = require('lodash');
+
 const models = require('../../../models');
-const auth = require('../../../services/auth');
 const settingsCache = require('../../../services/settings/cache');
 const common = require('../../../lib/common');
 
@@ -138,6 +138,6 @@ module.exports = {
                     req.user = user;
                     return req;
                 });
-        });
-    }
+            });
+        }
 };
