@@ -1,65 +1,112 @@
 const Promise = require('bluebird');
 const request = require('request');
+const settingsCache = require('../../../services/settings/cache');
 const common = require('../../../lib/common');
-const models = require('../../../models');
 
-module.exports = async function getRCUsers(apiUrl, header) {
-    const options = { context: { internal: true } };
-    let author_id;
-    models.Role.findOne({name: 'Author'})
-        .then((role)=>{
-            author_id = role.id;
-        });
-    return new Promise((resolve) => {
-        let users, offset = 0, total = 1, count = 10;
-        let fetched = false;
-        for (offset; offset < total;) {
-            request.get({ url: buidApiUrl(apiUrl, offset, count), headers: header }, function (e, r, body) {
-                let result = JSON.parse(body);
-                if (result.success) {
-                    total = result.total;
-                    //offset += result.count;
-                    users = result.users;
-                    // Check if RC gives admin callee result.
-                    // if (users && users[0] && !users[0].password) {
-                    //     throw new common.errors.InternalServerError({message: 'Doesnot have admin access in RC.'});    
-                    // }
-                    users.forEach(user => {
-                        models.User.findOne({ rc_id: user._id }, options)
-                            .then((u) => {
-                                // Don't save if User is already in the DB.
-                                if (!u) 
-                                    saveUser(user, author_id, options);
-                            });
-                    });
+function getRCUrl() {
+    return settingsCache.get('server_url');
+}
+
+function buildMeUrl(url = null) {
+    console.log('hrere');
+    const base = url || getRCUrl();
+    console.log(base);
+    return base + '/api/v1/me';
+}
+
+function buildUserQuery(username) {
+    return getRCUrl() + '/api/v1/users.info?' + `username=${username}`;
+}
+
+function getHeader(id, token) {
+    return {
+        'X-Auth-Token': token,
+        'X-User-Id': id
+    };
+}
+
+module.exports = {
+    checkAdmin(url, id, token) {
+        let user;
+        return new Promise((resolve) => {
+            request.get({ url: buildMeUrl(url), headers: getHeader(id, token) }, function (e, r, body) {
+                user = JSON.parse(body);
+                if (user.success) {
+                    if (user.roles.indexOf('admin') == -1) {
+                        //callee is not admin on RC
+                        return Promise.reject(new common.errors.GhostError({
+                            message: 'Callee is not an admin, cannot Setup Ghost'
+                        }));
+                    }
                 } else {
-                    return Promise.reject(new common.errors.InternalServerError({
-                        message: 'Unable to add user from RC'
+                    return Promise.reject(new common.errors.GhostError({
+                        message: 'Unable to fetch the details'
                     }));
                 }
+                resolve(user);
             });
-            offset = 1;
-        }
-        resolve(fetched);
-    })
+        })
+    },
+
+    getUser(id, token, username) {
+        let user;
+        return new Promise((resolve) => {
+            request.get({ url: buildUserQuery(username), headers: getHeader(id, token) }, function (e, r, body) {
+                let result;
+                if (body)
+                    result = JSON.parse(body);
+                if (result && result.success) {
+                    user = result;
+                } else {
+                    user = {
+                        success: false,
+                    };
+                }
+                resolve(user);
+            });
+        });
+    },
+
+    getMe(id, token) {
+        let user;
+        return new Promise((resolve) => {
+            request.get({ url: buildMeUrl(), headers: getHeader(id, token) }, function (e, r, body) {
+                let result;
+                if (body)
+                    result = JSON.parse(body);
+                if (result && result.success) {
+                    user = result;
+                } else {
+                    user = {
+                        success: false,
+                    };
+                }
+                resolve(user);
+            });
+        });
+    },
+
+    validateUser(id, token, userName) {
+        let user;
+        return new Promise((resolve) => {
+            request.get({ url: buildUserQuery(userName), headers: getHeader(id, token) }, function (e, r, body) {
+                let result;
+                if (body)
+                    result = JSON.parse(body);
+                if (result && result.success) {
+                    u = result.user;
+                    user = {
+                        exist: true,
+                        rid: u._id,
+                        username: u.username,
+                    };
+                } else {
+                    user = {
+                        exist: false,
+                    };
+                }
+                resolve(user);
+            });
+        });
+    }
 };
-
-function saveUser(user, role, options) {
-    // let email = user.emails[0].address;
-    // user.emails.foreach((e)=>{
-    //     if (e.verified) {
-    //         email = e.address;
-    //     }
-    // });
-    return models.User.add({
-        rc_id: user._id,
-        email: user._id + '@g.com',
-        name: user.name,
-        password: '$2a$10$etxjjsdeTbUC7aG3Od2/EuMUY4iqqXEV4jF0MtXSfsL2RmwJT3Jjm',//user.password.bcrypt,
-        roles: [role]// @TODO add author role_id
-    }, options);
-}
-
-function buidApiUrl(base, offset, count) {
-    return base + '?' + `offset=${offset}&count=${count}`;
-}
