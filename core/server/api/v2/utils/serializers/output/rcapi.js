@@ -7,8 +7,9 @@ module.exports = {
         if (!models) {
             return;
         }
+        
         frame.response = {
-            data : [models]
+            rc_users: [models]
         };
 
         debug(frame.response);
