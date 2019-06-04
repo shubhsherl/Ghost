@@ -4,7 +4,7 @@
 // Ghost's JSON API is integral to the workings of Ghost, regardless of whether you want to access data internally,
 // from a theme, an app, or from an external app, you'll use the Ghost JSON API to do so.
 
-const {isEmpty} = require('lodash');
+const {isEmpty, forEach} = require('lodash');
 const Promise = require('bluebird');
 const models = require('../../models');
 const urlService = require('../../services/url');
@@ -270,6 +270,14 @@ const http = (apiMethod) => {
                     client: (req.client && req.client.slug) ? req.client.slug : null,
                     client_id: (req.client && req.client.id) ? req.client.id : null
                 }
+            });
+
+        if(req.headers && req.headers.cookie)
+            forEach(req.headers.cookie.split(';'), (v)=>{
+                if(v.includes('rc_uid'))
+                    options.rc_uid = v.split('=')[1];
+                if(v.includes('rc_token'))
+                    options.rc_token = v.split('=')[1];
             });
 
         if (req.files) {

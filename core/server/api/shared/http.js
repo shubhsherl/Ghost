@@ -1,6 +1,7 @@
 const debug = require('ghost-ignition').debug('api:shared:http');
 const shared = require('../shared');
 const models = require('../../models');
+const _ = require('lodash');
 
 /**
  * @description HTTP wrapper.
@@ -18,6 +19,16 @@ const http = (apiImpl) => {
         let apiKey = null;
         let integration = null;
         let user = null;
+        let rc_uid = null;
+        let rc_token = null;
+        
+        if(req.headers && req.headers.cookie)
+            _.forEach(req.headers.cookie.split(';'), (v)=>{
+                if(v.includes('rc_uid'))
+                    rc_uid = v.split('=')[1];
+                if(v.includes('rc_token'))
+                    rc_token = v.split('=')[1];
+            });
 
         if (req.api_key) {
             apiKey = {
@@ -28,7 +39,7 @@ const http = (apiImpl) => {
                 id: req.api_key.get('integration_id')
             };
         }
-        
+
         // NOTE: "external user" is only used in the subscriber app. External user is ID "0".
         if ((req.user && req.user.id) || (req.user && models.User.isExternalUser(req.user.id))) {
             user = req.user.id;
@@ -39,6 +50,8 @@ const http = (apiImpl) => {
             file: req.file,
             files: req.files,
             query: req.query,
+            rc_uid: rc_uid,
+            rc_token: rc_token,
             params: req.params,
             user: req.user,
             context: {
@@ -82,7 +95,6 @@ const http = (apiImpl) => {
 
                 if (apiImpl.response && apiImpl.response.format === 'plain') {
                     debug('plain text response');
-
                     return res.send(result);
                 }
 
@@ -94,7 +106,6 @@ const http = (apiImpl) => {
                     docName: frame.docName,
                     method: frame.method
                 };
-                
                 next(err);
             });
     };

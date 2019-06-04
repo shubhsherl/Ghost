@@ -1,6 +1,5 @@
 const express = require('express');
 const api = require('../../../../api');
-const cors = require('cors');
 const apiv2 = require('../../../../api/v2');
 const mw = require('./middleware');
 
@@ -17,11 +16,7 @@ module.exports = function apiRoutes() {
     router.del = router.delete;
 
     // ## CORS pre-flight check
-    // router.options('*', shared.middlewares.api.cors);
-
-    // ## Allow CORS
-    router.options('*', cors());
-
+    router.options('*', shared.middlewares.api.cors);
 
     const http = apiv2.http;
 
@@ -72,6 +67,7 @@ module.exports = function apiRoutes() {
 
     router.get('/settings', mw.authAdminApi, http(apiv2.settings.browse));
     router.get('/settings/:key', mw.authAdminApi, http(apiv2.settings.read));
+    router.get('/invitesetting', http(apiv2.settings.inviteOnly));
     router.put('/settings', mw.authAdminApi, http(apiv2.settings.edit));
 
     // ## Users
@@ -80,7 +76,8 @@ module.exports = function apiRoutes() {
     router.get('/users/slug/:slug', mw.authAdminApi, http(apiv2.users.read));
     // NOTE: We don't expose any email addresses via the public api.
     router.get('/users/email/:email', mw.authAdminApi, http(apiv2.users.read));
-
+    // Public call: if user exist, based on rc_uid, and rc_token
+    router.get('/userexist', http(apiv2.users.exist));
     router.put('/users/password', mw.authAdminApi, http(apiv2.users.changePassword));
     router.put('/users/owner', mw.authAdminApi, http(apiv2.users.transferOwnership));
     router.put('/users/:id', mw.authAdminApi, http(apiv2.users.edit));
@@ -194,6 +191,7 @@ module.exports = function apiRoutes() {
     );
     router.put('/authentication/passwordreset', shared.middlewares.brute.globalBlock, api.http(api.authentication.resetPassword));
     router.post('/authentication/invitation', api.http(api.authentication.acceptInvitation));
+    router.post('/authentication/adduser', api.http(api.authentication.addUser));
     router.get('/authentication/invitation', api.http(api.authentication.isInvitation));
     router.post('/authentication/setup', api.http(api.authentication.setup));
     router.put('/authentication/setup', mw.authAdminApi, api.http(api.authentication.updateSetup));
@@ -213,6 +211,9 @@ module.exports = function apiRoutes() {
     router.get('/invites/:id', mw.authAdminApi, http(apiv2.invites.read));
     router.post('/invites', mw.authAdminApi, http(apiv2.invites.add));
     router.del('/invites/:id', mw.authAdminApi, http(apiv2.invites.destroy));
+
+    // ## RC Api
+    router.get('/rcapi', mw.authAdminApi, http(apiv2.rcapi.browse)); // No need for checking persmissions
 
     // ## Redirects (JSON based)
     router.get('/redirects/json', mw.authAdminApi, http(apiv2.redirects.download));

@@ -6,7 +6,6 @@ const path = require('path');
 const config = require('../../config');
 const models = require('../../models');
 const urlService = require('../../services/url');
-const rcUtils = require('./utils/rc-utils');
 const common = require('../../lib/common');
 const settingsCache = require('../../services/settings/cache');
 
@@ -42,6 +41,34 @@ module.exports = {
             }
 
             return settings;
+        }
+    },
+
+    // TODO: find a better way to check if this setting
+    // Maybe add a setting in RC and keep both in sync.
+    inviteOnly: {
+        options: [],
+        validation: {
+            options: {
+                include: []
+            }
+        },
+        permissions: false,
+        query(frame) {
+            const key = 'invite_only';
+            let setting = settingsCache.get(key, {resolve: false});
+
+            if (!setting) {
+                return Promise.reject(new common.errors.NotFoundError({
+                    message: common.i18n.t('errors.api.settings.problemFindingSetting', {
+                        key: key
+                    })
+                }));
+            }
+
+            return {
+                [key]: setting
+            };
         }
     },
 
@@ -117,70 +144,24 @@ module.exports = {
                 return setting.key === 'type';
             });
 
-            let isAnnounce = frame.data.settings.find((setting) => {
-                return setting.key === 'is_announced';
-            });
-
-            if (_.isObject(isAnnounce)) {
-                isAnnounce = isAnnounce.value;
-            }
-
             const errors = [];
 
-            if(isAnnounce) {
-                let room = frame.data.settings.find((setting) => {
-                    return setting.key === 'room';
-                });
-    
-                if (_.isObject(room)) {
-                    room = room.value;
-                }
+            _.each(frame.data.settings, (setting) => {
+                const settingFromCache = settingsCache.get(setting.key, {resolve: false});
 
-                if(!room) {
+                if (!settingFromCache) {
                     errors.push(new common.errors.NotFoundError({
-                        message: "Room Name should not be empty"
-                    }));
-                } else {
-                    let header = {
-                        'X-Auth-Token': 'Snhsgh5Q_q6y-ZlhGaN9AIbzN8iGCZEzfLAXNU9Y29G',
-                        'X-User-Id': 'AZG7dyTXMJoPhJHE7'
-                    };
-                    return rcUtils.validateRoom('https://open.rocket.chat/api/v1/rooms.info', header, room)
-                        .then((r, err)=>{
-                            if(err) {
-                                errors.push(err);
-                            } else if(!r || !r.exist) {
-                                errors.push(new common.errors.NotFoundError({
-                                    message: "Room not found, enter a Valid room name"
-                                }));
-                            } else if(r.name === room) {
-                                frame.data.settings.push({key: 'room_id', value: r.rid});
-                            }
-                            _.each(frame.data.settings, (setting) => {
-                                const settingFromCache = settingsCache.get(setting.key, {resolve: false});
-                
-                                if (!settingFromCache) {
-                                    errors.push(new common.errors.NotFoundError({
-                                        message: common.i18n.t('errors.api.settings.problemFindingSetting', {
-                                            key: setting.key
-                                        })
-                                    }));
-                                } else if (settingFromCache.type === 'core' && !(frame.options.context && frame.options.context.internal)) {
-                                    // @TODO: handle in settings model permissible fn
-                                    errors.push(new common.errors.NoPermissionError({
-                                        message: common.i18n.t('errors.api.settings.accessCoreSettingFromExtReq')
-                                    }));
-                                }
-                            });
-                            
-                            if (errors.length) {
-                                return Promise.reject(errors[0]);
-                            }
-                
-                            return models.Settings.edit(frame.data.settings, frame.options);
+                        message: common.i18n.t('errors.api.settings.problemFindingSetting', {
+                            key: setting.key
                         })
+                    }));
+                } else if (settingFromCache.type === 'core' && !(frame.options.context && frame.options.context.internal)) {
+                    // @TODO: handle in settings model permissible fn
+                    errors.push(new common.errors.NoPermissionError({
+                        message: common.i18n.t('errors.api.settings.accessCoreSettingFromExtReq')
+                    }));
                 }
-            }
+            });
 
             if (errors.length) {
                 return Promise.reject(errors[0]);

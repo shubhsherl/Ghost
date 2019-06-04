@@ -39,6 +39,10 @@ module.exports = {
         return require('./invites');
     },
 
+    get rcapi() {
+        return require('./rcapi');
+    },
+
     get settings() {
         return require('./settings');
     },

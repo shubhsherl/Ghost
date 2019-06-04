@@ -64,7 +64,9 @@ module.exports = {
     },
     users: {
         id: {type: 'string', maxlength: 24, nullable: false, primary: true},
-        rc_id: {type: 'string', maxlength: 17, nullable: true, unique: false},
+        // rc_username can change but rc_id will never change
+        rc_id: {type: 'string', maxlength: 17, nullable: false, unique: true},
+        rc_username: {type: 'string', maxlength: 17, nullable: false, unique: true},
         name: {type: 'string', maxlength: 191, nullable: false},
         slug: {type: 'string', maxlength: 191, nullable: false, unique: true},
         ghost_auth_access_token: {type: 'string', maxlength: 32, nullable: true},
