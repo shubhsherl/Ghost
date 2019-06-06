@@ -19,6 +19,10 @@ function buildUserQuery(username) {
     return getRCUrl() + '/api/v1/users.info?' + `username=${username}`;
 }
 
+function buildRoomQuery(roomname) {
+    return getRCUrl() + '/api/v1/rooms.info?' + `roomName=${roomname}`;
+}
+
 function getHeader(id, token) {
     return {
         'X-Auth-Token': token,
@@ -108,12 +112,14 @@ module.exports = {
                 if (result && result.success) {
                     u = result.user;
                     user = {
+                        type: 'rc_users',
                         exist: true,
-                        rid: u._id,
+                        uid: u._id,
                         username: u.username,
                     };
                 } else {
                     user = {
+                        type: 'rc_users',
                         exist: false,
                     };
                 }
@@ -139,5 +145,31 @@ module.exports = {
                     return req;
                 });
             });
-        }
+    },
+    
+    validateRoom(id, token, roomName) {
+        let room;
+        return new Promise((resolve) => {
+            request.get({ url: buildRoomQuery(roomName), headers: getHeader(id, token) }, function (e, r, body) {
+                let result;
+                if (body)
+                    result = JSON.parse(body);
+                if (result && result.success) {
+                    r = result.room;
+                    room = {
+                        type: 'rc_rooms',
+                        exist: true,
+                        rid: r._id,
+                        roomname: r.name,
+                    };
+                } else {
+                    room = {
+                        type: 'rc_rooms',
+                        exist: false,
+                    };
+                }
+                resolve(room);
+            });
+        });
+    }
 };
