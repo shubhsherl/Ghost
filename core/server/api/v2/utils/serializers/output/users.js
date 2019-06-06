@@ -19,7 +19,8 @@ module.exports = {
         
         frame.response = {
             users: [{
-                exist: model?model.status:false
+                exist: model?true:false,
+                status: model?model.status:'inactive'
             }]
         };
 
