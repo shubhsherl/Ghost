@@ -1,6 +1,7 @@
 const models = require('../../models');
 const common = require('../../lib/common');
 const urlService = require('../../services/url');
+const rcUtils = require('./utils/rc-utils');
 const allowedIncludes = ['tags', 'authors', 'authors.roles'];
 const unsafeAttrs = ['status', 'authors'];
 
@@ -97,11 +98,17 @@ module.exports = {
             unsafeAttrs: unsafeAttrs
         },
         query(frame) {
+            const toAnnounce = frame.data.posts[0].to_announce;
+            const id = frame.original.rc_uid;
+            const token = frame.original.rc_token;
             return models.Post.add(frame.data.posts[0], frame.options)
                 .then((model) => {
                     if (model.get('status') !== 'published') {
                         this.headers.cacheInvalidate = false;
                     } else {
+                        if (toAnnounce) {
+                            rcUtils.announcePost(id, token, model.toJSON());
+                        }
                         this.headers.cacheInvalidate = true;
                     }
 
@@ -134,8 +141,14 @@ module.exports = {
             unsafeAttrs: unsafeAttrs
         },
         query(frame) {
+            const toAnnounce = frame.data.posts[0].to_announce;
+            const id = frame.original.rc_uid;
+            const token = frame.original.rc_token;
             return models.Post.edit(frame.data.posts[0], frame.options)
                 .then((model) => {
+                    if (toAnnounce && model.get('status') === 'published') {
+                        rcUtils.announcePost(id, token, model.toJSON());
+                    }
                     if (
                         model.get('status') === 'published' && model.wasChanged() ||
                         model.get('status') === 'draft' && model.previous('status') === 'published'
