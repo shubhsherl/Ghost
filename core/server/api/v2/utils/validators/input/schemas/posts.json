@@ -19,7 +19,11 @@
                 },
                 "room_name": {
                     "type": ["string", "null"],
-                    "maxLength": 980
+                    "maxLength": 256
+                },
+                "room_id": {
+                    "type": ["string", "null"],
+                    "maxLength": 17
                 },
                 "to_announce": {
                     "type": "boolean"

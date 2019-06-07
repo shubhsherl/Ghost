@@ -110,7 +110,7 @@
         "server_url": {
             "defaultValue": "http://localhost:4000"
         },
-        "room": {
+        "room_name": {
             "defaultValue": "articles",
             "validations": {
                 "isLength": {
