@@ -10,15 +10,19 @@ module.exports = {
         const base = url || this.getRCUrl();
         return base + '/api/v1/me';
     },
-
+    
     buildUserQuery(username) {
         return this.getRCUrl() + '/api/v1/users.info?' + `username=${username}`;
     },
-
+    
     buildRoomQuery(roomname) {
         return this.getRCUrl() + '/api/v1/rooms.info?' + `roomName=${roomname}`;
     },
-
+    
+    buildAnnounce() {
+        return this.getRCUrl() + '/api/v1/chat.postMessage';
+    },
+    
     getHeader(id, token) {
         return {
             'X-Auth-Token': token,
