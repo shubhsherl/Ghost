@@ -7,16 +7,19 @@ function handleImageUrl(url) {
 }
 
 module.exports = (post) => {
+    const avatar = settingsCache.get('icon') ? handleImageUrl(settingsCache.get('icon')) : null;
     const blogUrl = utils.getBlogUrl();
-    console.log(settingsCache.get('icon'));
-    let image = post.rc_image ? post.rc_image : (post.feature_image ? post.feature_image : settingsCache.get('cover_image'));
-    image = handleImageUrl(image);
     const postUrl = `${blogUrl}/${post.slug}`;
+
+    let image = post.rc_image ? post.rc_image : (post.feature_image ? post.feature_image : settingsCache.get('cover_image'));
     let shortDescription = post.html.replace(/<[^>]*>?/gm, ' ');
+    
+    image = handleImageUrl(image);
     shortDescription = shortDescription.length > 500 ? `${shortDescription.substring(1, 500)}...` : shortDescription;
+    
     return {
         "alias": settingsCache.get('title'),
-        "avatar": handleImageUrl(settingsCache.get('icon')),
+        "avatar": avatar,
         "roomId": post.room_id,
         "text": `@here: @${post.primary_author.rc_username} published an article`,
         "attachments": [
