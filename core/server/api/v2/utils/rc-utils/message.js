@@ -1,41 +1,39 @@
+const utils = require('../../../../services/url/utils');
+const urlService = require('../../../../services/url');
+const settingsCache = require('../../../../services/settings/cache');
+
+function handleImageUrl(url) {
+    return urlService.utils.urlFor('image', { image: url }, true);
+}
+
 module.exports = (post) => {
-    console.log(post);
+    const blogUrl = utils.getBlogUrl();
+    console.log(settingsCache.get('icon'));
+    let image = post.rc_image ? post.rc_image : (post.feature_image ? post.feature_image : settingsCache.get('cover_image'));
+    image = handleImageUrl(image);
+    const postUrl = `${blogUrl}/${post.slug}`;
+    let shortDescription = post.html.replace(/<[^>]*>?/gm, ' ');
+    shortDescription = shortDescription.length > 500 ? `${shortDescription.substring(1, 500)}...` : shortDescription;
     return {
-        "alias": post.slug,
-        "avatar": "http://res.guggy.com/logo_128.png",
-        "emoji": ":smirk:",
+        "alias": settingsCache.get('title'),
+        "avatar": handleImageUrl(settingsCache.get('icon')),
         "roomId": post.room_id,
-        "text": post.title,
+        "text": `@here: @${post.primary_author.rc_username} published an article`,
         "attachments": [
             {
-                "audio_url": "http://www.w3schools.com/tags/horse.mp3",
-                "author_icon": "https://avatars.githubusercontent.com/u/850391?v=3",
-                "author_link": "https://rocket.chat/",
-                "author_name": "Bradley Hilton",
-                // "collapsed": false,
-                "color": "#ff0000",
-                "fields": [
+                "title": post.rc_title || post.title,
+                "description": post.rc_description || shortDescription,
+                "image_url": image,
+                "button_alignment": "horizontal",
+                "actions": [
                     {
-                        // "short": true,
-                        "title": "Test",
-                        "value": "Testing out something or other"
-                    },
-                    {
-                        // "short": true,
-                        "title": "Another Test",
-                        "value": "[Link](https://google.com/) something and this and that."
+                        "type": "button",
+                        "text": "View",
+                        "url": postUrl,
                     }
-                ],
-                "image_url": "http://res.guggy.com/logo_128.png",
-                "message_link": "https://google.com",
-                "text": "Yay for gruggy!",
-                "thumb_url": "http://res.guggy.com/logo_128.png",
-                "title": "Attachment Example",
-                "title_link": "https://youtube.com",
-                // "title_link_download": true,
-                "ts": post.updated_at,
-                "video_url": "http://www.w3schools.com/tags/movie.mp4"
+                ]
             }
         ]
     };
 }
+

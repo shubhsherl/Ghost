@@ -150,14 +150,6 @@ module.exports = {
     announcePost(id, token, post) {
         return new Promise((resolve) => {
             request.post({ url: api.buildAnnounce(), headers: api.getHeader(id, token), form: message(post) }, function (e, r, body) {
-                let result;
-                if (body)
-                    result = JSON.parse(body);
-                if (result && result.success) {
-                    console.log('true');
-                } else {
-                    console.log('false');
-                }
                 resolve();
             });
         });
