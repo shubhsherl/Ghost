@@ -155,6 +155,12 @@
             "validations": {
                 "isIn": [["true", "false"]]
             }
+        },
+        "can_collaborate": {
+            "defaultValue": "false",
+            "validations": {
+                "isIn": [["true", "false"]]
+            }
         }
     },
     "private": {
