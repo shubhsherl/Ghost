@@ -1,6 +1,6 @@
-const utils = require('../../../../services/url/utils');
-const urlService = require('../../../../services/url');
-const settingsCache = require('../../../../services/settings/cache');
+const utils = require('../../services/url/utils');
+const urlService = require('../../services/url');
+const settingsCache = require('../../services/settings/cache');
 
 function handleImageUrl(url) {
     return urlService.utils.urlFor('image', { image: url }, true);
@@ -21,6 +21,7 @@ module.exports = (post) => {
         "alias": settingsCache.get('title'),
         "avatar": avatar,
         "roomId": post.room_id,
+        "userId": post.primary_author.rc_id,
         "text": `@here: @${post.primary_author.rc_username} published an article`,
         "attachments": [
             {

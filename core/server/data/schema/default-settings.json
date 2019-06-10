@@ -110,8 +110,14 @@
         "server_url": {
             "defaultValue": "http://localhost:4000"
         },
+        "announce_token": {
+            "defaultValue": "hookid/tokentoannounce"
+        },
+        "collaboration_token": {
+            "defaultValue": "hookid/tokentocollaborate"
+        },
         "room_name": {
-            "defaultValue": "articles",
+            "defaultValue": "general",
             "validations": {
                 "isLength": {
                     "max": 150
@@ -119,7 +125,7 @@
             }
         },
         "room_id": {
-            "defaultValue": "ridOfAboveRoom",
+            "defaultValue": "GENERAL",
             "validations": {
                 "isLength": {
                     "max": 17

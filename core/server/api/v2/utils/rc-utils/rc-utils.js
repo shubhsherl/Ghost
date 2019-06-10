@@ -2,7 +2,6 @@ const Promise = require('bluebird');
 const request = require('request');
 const common = require('../../../../lib/common');
 const api = require('./api');
-const message = require('./message');
 
 function getIdToken(req) {
     let id, token;
@@ -143,14 +142,6 @@ module.exports = {
                     };
                 }
                 resolve(room);
-            });
-        });
-    },
-
-    announcePost(id, token, post) {
-        return new Promise((resolve) => {
-            request.post({ url: api.buildAnnounce(), headers: api.getHeader(id, token), form: message(post) }, function (e, r, body) {
-                resolve();
             });
         });
     }

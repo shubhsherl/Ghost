@@ -25,7 +25,7 @@
                     "type": ["string", "null"],
                     "maxLength": 17
                 },
-                "to_announce": {
+                "announce": {
                     "type": "boolean"
                 },
                 "mobiledoc": {

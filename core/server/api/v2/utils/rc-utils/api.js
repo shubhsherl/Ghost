@@ -19,10 +19,6 @@ module.exports = {
         return this.getRCUrl() + '/api/v1/rooms.info?' + `roomName=${roomname}`;
     },
 
-    buildAnnounce() {
-        return this.getRCUrl() + '/api/v1/chat.postMessage';
-    },
-
     getHeader(id, token) {
         return {
             'X-Auth-Token': token,
