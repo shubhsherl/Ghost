@@ -212,12 +212,13 @@ module.exports = function apiRoutes() {
     router.post('/invites', mw.authAdminApi, http(apiv2.invites.add));
     router.del('/invites/:id', mw.authAdminApi, http(apiv2.invites.destroy));
 
+    // ## RC Incoming Webhook
+    router.post('/rhooks/:id/:token', http(apiv2.rhooks.callbacks));
+
     // ## RC Api
     router.get('/rcapi', mw.authAdminApi, http(apiv2.rcapi.browse));
     router.post('/rcapi/discussion', mw.authAdminApi, http(apiv2.rcapi.discussion));
-    
-    // ## RC Incoming Webhook
-    router.post('/rhooks/:id/:token', http(apiv2.rhooks.callbacks));
+    router.post('/rcapi/collaborate', mw.authAdminApi, http(apiv2.rcapi.collaborate));
 
     // ## Redirects (JSON based)
     router.get('/redirects/json', mw.authAdminApi, http(apiv2.redirects.download));

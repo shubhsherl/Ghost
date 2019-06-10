@@ -46,13 +46,36 @@ module.exports = {
                 include: ALLOWED_INCLUDES
             }
         },
+
         permissions: false,
         query(frame) {
             const username = frame.user.get('rc_username');
-            const {title, type} = frame.data.room[0];
+            const { title, type } = frame.data.room[0];
             return rcUtils.createDiscussion(frame.original.rc_uid, frame.original.rc_token, title, username, type)
                 .then((room) => {
                     return room;
+
+                });
+        }
+    },
+
+    collaborate: {
+        options: [],
+        data: [
+            'collaboration'
+        ],
+        validation: {
+            options: {
+                include: ALLOWED_INCLUDES,
+            }
+        },
+        permissions: false,
+        query(frame) {
+            const {rc_id, post_id, post} = frame.data.collaboration[0]
+
+            return rcUtils.collaborate(frame.original.rc_uid, frame.original.rc_token, rc_id, post_id, post)
+                .then((res) => {
+                    return res;
                 });
         }
     }

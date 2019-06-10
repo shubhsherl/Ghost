@@ -34,6 +34,10 @@ module.exports = {
     buildDiscussionUrl() {
         return this.getRCUrl() + '/api/v1/rooms.createDiscussion';
     },
+    
+    buildSubscriptionQuery(roomId) {
+        return this.getRCUrl() + '/api/v1/subscriptions.getOne?' + `roomId=${roomId}`;
+    },
 
     getHeader(id, token) {
         return {

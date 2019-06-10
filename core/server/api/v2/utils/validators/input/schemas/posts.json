@@ -36,6 +36,9 @@
                 "announce": {
                     "type": "boolean"
                 },
+                "collaborate": {
+                    "type": "boolean"
+                },
                 "mobiledoc": {
                     "type": ["string", "null"],
                     "maxLength": 1000000000

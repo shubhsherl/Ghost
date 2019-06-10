@@ -11,13 +11,13 @@ module.exports = (post) => {
     const avatar = imageLib.blogIcon.getIconUrl(true);
     const blogUrl = utils.getBlogUrl();
     const postUrl = `${blogUrl}${post.slug}`;
-    const actions = [
-        {
-            type: 'button',
-            text: 'View',
-            url: postUrl
-        }
-    ];
+    const collaborateUrl = `${blogUrl}ghost/editor/post/${post.id}`;
+    let actions = [{
+        type: "button",
+        text: "View",
+        url: postUrl,
+    }];
+
     if (post.discussion_room_id && post.discussion_room_name) {
         actions.push({
             type: 'button',
@@ -25,6 +25,13 @@ module.exports = (post) => {
             url: `/channel/${post.discussion_room_name}`
         });
     }
+
+    if (post.collaborate)
+        actions.push({
+            type: "button",
+            text: "Collaborate",
+            url: collaborateUrl,
+        });
 
     let image = post.rc_image ? post.rc_image : (post.feature_image ? post.feature_image : settingsCache.get('cover_image'));
     let shortDescription = post.html.replace(/<[^>]*>?/gm, ' ');
