@@ -1,3 +1,4 @@
+const imageLib = require('../../lib/image');
 const utils = require('../../services/url/utils');
 const urlService = require('../../services/url');
 const settingsCache = require('../../services/settings/cache');
@@ -7,7 +8,7 @@ function handleImageUrl(url) {
 }
 
 module.exports = (post) => {
-    const avatar = settingsCache.get('icon') ? handleImageUrl(settingsCache.get('icon')) : null;
+    const avatar = imageLib.blogIcon.getIconUrl(true);
     const blogUrl = utils.getBlogUrl();
     const postUrl = `${blogUrl}/${post.slug}`;
 
