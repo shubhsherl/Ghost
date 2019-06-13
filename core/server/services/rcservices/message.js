@@ -8,7 +8,21 @@ function handleImageUrl(url) {
 
 module.exports = (post) => {
     const blogUrl = utils.getBlogUrl();
-    console.log(settingsCache.get('icon'));
+    const postUrl = `${blogUrl}${post.slug}`;
+    const collaborateUrl = `${blogUrl}/ghost/editor/post/${post.id}`;
+    let actions = [{
+        "type": "button",
+        "text": "View",
+        "url": postUrl,
+    }];
+
+    if (post.collaborate)
+        actions.push({
+            "type": "button",
+            "text": "Collaborate",
+            "url": collaborateUrl,
+        });
+
     let image = post.rc_image ? post.rc_image : (post.feature_image ? post.feature_image : settingsCache.get('cover_image'));
     image = handleImageUrl(image);
     const postUrl = `${blogUrl}/${post.slug}`;
@@ -26,13 +40,7 @@ module.exports = (post) => {
                 "description": post.rc_description || shortDescription,
                 "image_url": image,
                 "button_alignment": "horizontal",
-                "actions": [
-                    {
-                        "type": "button",
-                        "text": "View",
-                        "url": postUrl,
-                    }
-                ]
+                "actions": actions
             }
         ]
     };

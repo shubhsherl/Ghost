@@ -28,7 +28,7 @@
                 "announce": {
                     "type": "boolean"
                 },
-                "to_collaborate": {
+                "collaborate": {
                     "type": "boolean"
                 },
                 "mobiledoc": {
