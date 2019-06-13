@@ -26,6 +26,7 @@ module.exports = {
         featured: {type: 'bool', nullable: false, defaultTo: false},
         page: {type: 'bool', nullable: false, defaultTo: false},
         announce: {type: 'bool', nullable: true, defaultTo: false},
+        collaborate: {type: 'bool', nullable: true, defaultTo: false},
         status: {type: 'string', maxlength: 50, nullable: false, defaultTo: 'draft'},
         locale: {type: 'string', maxlength: 6, nullable: true},
         visibility: {

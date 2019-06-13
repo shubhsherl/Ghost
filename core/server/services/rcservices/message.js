@@ -9,6 +9,7 @@ function handleImageUrl(url) {
 module.exports = (post) => {
     const blogUrl = utils.getBlogUrl();
     const postUrl = `${blogUrl}${post.slug}`;
+    const collaborateUrl = `${blogUrl}/ghost/editor/post/${post.id}`;
     const actions = [
         {
             "type": "button",
@@ -21,9 +22,16 @@ module.exports = (post) => {
             "type": "button",
             "text": "Discussion",
             "url": `/channel/${post.discussion_room_name}`
-        })
+        });
     }
 
+    if (post.collaborate) {
+        actions.push({
+            "type": "button",
+            "text": "Collaborate",
+            "url": collaborateUrl,
+        });
+    }
     let image = post.rc_image ? post.rc_image : (post.feature_image ? post.feature_image : settingsCache.get('cover_image'));
     image = handleImageUrl(image);
     const postUrl = `${blogUrl}/${post.slug}`;
@@ -41,7 +49,7 @@ module.exports = (post) => {
                 "description": post.rc_description || shortDescription,
                 "image_url": image,
                 "button_alignment": "horizontal",
-                "actions": actions,
+                "actions": actions
             }
         ]
     };
