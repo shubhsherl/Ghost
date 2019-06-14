@@ -14,6 +14,7 @@ const session = {
          */
         return models.User.findOne({id: options.context.user});
     },
+    
     add(object) {
         if (!object || !object.rc_id || !object.rc_token) {
             return Promise.reject(new common.errors.UnauthorizedError({
@@ -53,6 +54,7 @@ const session = {
             });
         });
     },
+
     delete() {
         return Promise.resolve((req, res, next) => {
             auth.session.destroySession(req, res, next);

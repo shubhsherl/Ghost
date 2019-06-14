@@ -489,7 +489,6 @@ authentication = {
 
         function processInvitation(invitation) {
             const data = invitation.user[0];
-            console.log(data);
             return rcUtils.getUser(rc_uid, rc_token, data.rc_username)
                 .then((user) => {
                     if (user.success && user.user) {

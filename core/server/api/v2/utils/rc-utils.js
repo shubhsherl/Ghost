@@ -1,5 +1,8 @@
 const Promise = require('bluebird');
 const request = require('request');
+const { forEach } = require('lodash');
+const models = require('../../../models');
+const auth = require('../../../services/auth');
 const settingsCache = require('../../../services/settings/cache');
 const common = require('../../../lib/common');
 
@@ -8,9 +11,7 @@ function getRCUrl() {
 }
 
 function buildMeUrl(url = null) {
-    console.log('hrere');
     const base = url || getRCUrl();
-    console.log(base);
     return base + '/api/v1/me';
 }
 
@@ -23,6 +24,17 @@ function getHeader(id, token) {
         'X-Auth-Token': token,
         'X-User-Id': id
     };
+}
+
+function getIdToken(req) {
+    let id, token;
+    forEach(req.headers.cookie.split(';'), (v) => {
+        if (v.includes('rc_uid'))
+            id = v.split('=')[1];
+        if (v.includes('rc_token'))
+            token = v.split('=')[1];
+    });
+    return { id, token };
 }
 
 module.exports = {
@@ -107,6 +119,25 @@ module.exports = {
                 }
                 resolve(user);
             });
+        });
+    },
+
+    createSession(req) {
+        const { id, token } = getIdToken(req);
+        if (!id || !token)
+            return req;
+        return models.User.findOne({ rc_id: id }).then((user) => {
+            if (!user) {
+                return req;
+            }
+            return this.getMe(id, token)
+                .then((u) => {
+                    if (!u.success) {
+                        return req;
+                    }
+                    req.user = user;
+                    return req;
+                });
         });
     }
 };
