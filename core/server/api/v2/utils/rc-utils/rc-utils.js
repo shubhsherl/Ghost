@@ -1,5 +1,7 @@
 const Promise = require('bluebird');
 const request = require('request');
+const {forEach} = require('lodash');
+const models = require('../../../../models');
 const common = require('../../../../lib/common');
 const api = require('./api');
 
@@ -125,8 +127,10 @@ module.exports = {
         return new Promise((resolve) => {
             request.get({ url: api.buildRoomQuery(roomName), headers: api.getHeader(id, token) }, function (e, r, body) {
                 let result;
+
                 if (body)
                     result = JSON.parse(body);
+
                 if (result && result.success) {
                     r = result.room;
                     room = {

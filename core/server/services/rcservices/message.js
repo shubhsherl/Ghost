@@ -10,7 +10,7 @@ function handleImageUrl(url) {
 module.exports = (post) => {
     const avatar = imageLib.blogIcon.getIconUrl(true);
     const blogUrl = utils.getBlogUrl();
-    const postUrl = `${blogUrl}/${post.slug}`;
+    const postUrl = `${blogUrl}${post.slug}`;
 
     let image = post.rc_image ? post.rc_image : (post.feature_image ? post.feature_image : settingsCache.get('cover_image'));
     let shortDescription = post.html.replace(/<[^>]*>?/gm, ' ');
