@@ -134,6 +134,8 @@ module.exports = {
             unsafeAttrs: unsafeAttrs
         },
         query(frame) {
+            console.log(frame.data.posts[0]);
+            console.log(frame.options);
             return models.Post.edit(frame.data.posts[0], frame.options)
                 .then((model) => {
                     if (

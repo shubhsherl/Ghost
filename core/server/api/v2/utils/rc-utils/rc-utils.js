@@ -1,7 +1,20 @@
 const Promise = require('bluebird');
 const request = require('request');
+const {forEach} = require('lodash');
+const models = require('../../../../models');
 const common = require('../../../../lib/common');
 const api = require('./api');
+
+function getIdToken(req) {
+    let id, token;
+    forEach(req.headers.cookie.split(';'), (v) => {
+        if (v.includes('rc_uid'))
+            id = v.split('=')[1];
+        if (v.includes('rc_token'))
+            token = v.split('=')[1];
+    });
+    return { id, token };
+}
 
 module.exports = {
     checkAdmin(url, id, token) {
@@ -90,13 +103,59 @@ module.exports = {
         });
     },
 
+    createSession(req) {
+        const { id, token } = getIdToken(req);
+        if (!id || !token)
+            return req;
+        return models.User.findOne({ rc_id: id }).then((user) => {
+            if (!user) {
+                return req;
+            }
+            return this.getMe(id, token)
+                .then((u) => {
+                    if (!u.success) {
+                        return req;
+                    }
+                    req.user = user;
+                    return req;
+                });
+            });
+    },
+
+    collaborate(id, token, rcId, postId, posts) {
+        const failResult = {collaborate: false};
+
+        if (id !== rcId)
+            return failResult;
+
+        return models.Post.findOne({ id: postId}).then((post) => {
+            if (!post || !post.get('collaborate')) {
+                return failResult;
+            }
+            return models.User.findOne({ rc_id: id }).then((user) => {
+                if (!user) {
+                    return failResult;
+                }
+                return this.validateSubscription(id, token, post.get('room_id'))
+                    .then((s) => {
+                        if (s.exist) {
+                            // return models.Post.edit(posts);
+                        }
+                        return {collaborate: s.exist};
+                    });
+                });
+        })
+    },
+    
     validateRoom(id, token, roomName) {
         let room;
         return new Promise((resolve) => {
             request.get({ url: api.buildRoomQuery(roomName), headers: api.getHeader(id, token) }, function (e, r, body) {
                 let result;
+
                 if (body)
                     result = JSON.parse(body);
+
                 if (result && result.success) {
                     r = result.room;
                     room = {
@@ -114,5 +173,19 @@ module.exports = {
                 resolve(room);
             });
         });
+    },
+
+    validateSubscription(id, token, roomId) {
+        let subscription;
+        return new Promise((resolve) => {
+            request.get({ url: api.buildSubscriptionQuery(roomId), headers: api.getHeader(id, token) }, function (e, r, body) {
+                let result;
+                if (body)
+                    result = JSON.parse(body);
+                subscription = {exist: result && result.success && !!result.subscription};
+                resolve(subscription);
+            });
+        });
     }
+
 };

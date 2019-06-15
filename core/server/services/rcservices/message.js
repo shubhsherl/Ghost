@@ -25,7 +25,6 @@ module.exports = (post) => {
 
     let image = post.rc_image ? post.rc_image : (post.feature_image ? post.feature_image : settingsCache.get('cover_image'));
     image = handleImageUrl(image);
-    const postUrl = `${blogUrl}/${post.slug}`;
     let shortDescription = post.html.replace(/<[^>]*>?/gm, ' ');
     shortDescription = shortDescription.length > 500 ? `${shortDescription.substring(1, 500)}...` : shortDescription;
     return {

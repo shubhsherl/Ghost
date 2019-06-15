@@ -19,6 +19,10 @@ module.exports = {
         return this.getRCUrl() + '/api/v1/rooms.info?' + `roomName=${roomname}`;
     },
 
+    buildSubscriptionQuery(roomId) {
+        return this.getRCUrl() + '/api/v1/subscriptions.getOne?' + `roomId=${roomId}`;
+    },
+
     getHeader(id, token) {
         return {
             'X-Auth-Token': token,
