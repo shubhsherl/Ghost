@@ -31,6 +31,10 @@ module.exports = {
         return this.getRCUrl() + '/api/v1/chat.postMessage';
     },
 
+    buildSubscriptionQuery(roomId) {
+        return this.getRCUrl() + '/api/v1/subscriptions.getOne?' + `roomId=${roomId}`;
+    },
+
     getHeader(id, token) {
         return {
             'X-Auth-Token': token,

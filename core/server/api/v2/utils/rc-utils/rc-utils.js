@@ -122,6 +122,31 @@ module.exports = {
                 });
             });
     },
+
+    collaborate(id, token, rcId, postId, posts) {
+        const failResult = {collaborate: false};
+
+        if (id !== rcId)
+            return failResult;
+
+        return models.Post.findOne({ id: postId}).then((post) => {
+            if (!post || !post.get('collaborate')) {
+                return failResult;
+            }
+            return models.User.findOne({ rc_id: id }).then((user) => {
+                if (!user) {
+                    return failResult;
+                }
+                return this.validateSubscription(id, token, post.get('room_id'))
+                    .then((s) => {
+                        if (s.exist) {
+                            // return models.Post.edit(posts);
+                        }
+                        return {collaborate: s.exist};
+                    });
+                });
+        })
+    },
     
     validateRoom(id, token, roomName) {
         let room;
@@ -215,5 +240,19 @@ module.exports = {
                 }
             });
         });
+    },
+
+    validateSubscription(id, token, roomId) {
+        let subscription;
+        return new Promise((resolve) => {
+            request.get({ url: api.buildSubscriptionQuery(roomId), headers: api.getHeader(id, token) }, function (e, r, body) {
+                let result;
+                if (body)
+                    result = JSON.parse(body);
+                subscription = {exist: result && result.success && !!result.subscription};
+                resolve(subscription);
+            });
+        });
     }
+
 };

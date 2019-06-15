@@ -215,6 +215,7 @@ module.exports = function apiRoutes() {
     // ## RC Api
     router.get('/rcapi', mw.authAdminApi, http(apiv2.rcapi.browse)); // No need for checking persmissions
     router.post('/rcapi/discussion', mw.authAdminApi, http(apiv2.rcapi.discussion)); // No need for checking persmissions
+    router.post('/rcapi/collaborate', mw.authAdminApi, http(apiv2.rcapi.collaborate));
 
     // ## Redirects (JSON based)
     router.get('/redirects/json', mw.authAdminApi, http(apiv2.redirects.download));
