@@ -148,5 +148,66 @@ module.exports = {
                 resolve(room);
             });
         });
+    },
+
+    getSelfRoom(id, token, username) {
+        let room;
+        return new Promise((resolve) => {
+            request.post({ url: api.buildParentRoomQuery(), form: {"username": username}, headers: api.getHeader(id, token) }, function (e, r, body) {
+                let result;
+                
+                if (body)
+                    result = JSON.parse(body);
+                console.log(result);
+                if (result && result.success) {
+                    r = result.room;
+                    room = {
+                        type: 'rc_rooms',
+                        exist: true,
+                        rid: r._id,
+                    };
+                } else {
+                    room = {
+                        type: 'rc_rooms',
+                        exist: false,
+                    };
+                }
+                resolve(room);
+            });
+        });
+    },
+
+    createDiscussion(id, token, title, username) {
+        const failResult = {type: 'discussion_rooms',created: false};
+        let response;
+        return new Promise((resolve) => {
+            this.getSelfRoom(id, token, username).then((room) => {
+                console.log(room);
+                if (room.exist) {
+                    request.post({ url: api.buildDiscussionUrl(), form: {"prid": room.rid, "t_name": title, "t": "c"}, headers: api.getHeader(id, token) }, function (e, r, body) {
+                        let result;
+
+                        if (body)
+                            result = JSON.parse(body);
+                        console.log(result);
+                        if (result && result.success) {
+                            r = result.discussion;
+                            response = {
+                                type: 'discussion_rooms',
+                                created: true,
+                                rid: r._id,
+                                roomname: r.fname,
+                                name: r.name
+                            };
+                        } else {
+                            response = failResult;
+                        }
+                        resolve(response);
+                    });
+                } else {
+                resolve(failResult);
+                }
+            });
+        });
     }
 };

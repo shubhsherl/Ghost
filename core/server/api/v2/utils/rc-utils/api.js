@@ -19,6 +19,14 @@ module.exports = {
         return this.getRCUrl() + '/api/v1/rooms.info?' + `roomName=${roomname}`;
     },
 
+    buildParentRoomQuery() {
+        return this.getRCUrl() + '/api/v1/im.create';
+    },
+
+    buildDiscussionUrl() {
+        return this.getRCUrl() + '/api/v1/rooms.createDiscussion';
+    },
+
     getHeader(id, token) {
         return {
             'X-Auth-Token': token,

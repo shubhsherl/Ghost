@@ -35,5 +35,24 @@ module.exports = {
                     return room;
                 });
         }
+    },
+
+    discussion: {
+        options: [],
+        data: ['room'],
+        validation: {
+            options: {
+                include: ALLOWED_INCLUDES,
+            }
+        },
+        permissions: false,
+        query(frame) {
+            const username = frame.user.get('rc_username');
+            const {title} = frame.data.room[0];
+            return rcUtils.createDiscussion(frame.original.rc_uid, frame.original.rc_token, title, username)
+                .then((room) => {
+                    return room;
+                });
+        }
     }
 };

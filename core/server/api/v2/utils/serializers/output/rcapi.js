@@ -7,7 +7,6 @@ module.exports = {
         if (!models) {
             return;
         }
-        console.log(models)
         frame.response = {
             data : [models]
         };

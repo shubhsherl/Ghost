@@ -25,6 +25,14 @@
                     "type": ["string", "null"],
                     "maxLength": 17
                 },
+                "discussion_room_id": {
+                    "type": ["string", "null"],
+                    "maxLength": 17
+                },
+                "discussion_room_name": {
+                    "type": ["string", "null"],
+                    "maxLength": 256
+                },
                 "announce": {
                     "type": "boolean"
                 },
