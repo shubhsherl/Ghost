@@ -11,6 +11,20 @@ module.exports = (post) => {
     const avatar = imageLib.blogIcon.getIconUrl(true);
     const blogUrl = utils.getBlogUrl();
     const postUrl = `${blogUrl}${post.slug}`;
+    const actions = [
+        {
+            "type": "button",
+            "text": "View",
+            "url": postUrl
+        }
+    ];
+    if(post.discussion_room_id && post.discussion_room_name) {
+        actions.push({
+            "type": "button",
+            "text": "Discussion",
+            "url": `/channel/${post.discussion_room_name}`
+        })
+    }
 
     let image = post.rc_image ? post.rc_image : (post.feature_image ? post.feature_image : settingsCache.get('cover_image'));
     let shortDescription = post.html.replace(/<[^>]*>?/gm, ' ');
@@ -30,13 +44,7 @@ module.exports = (post) => {
                 "description": post.rc_description || shortDescription,
                 "image_url": image,
                 "button_alignment": "horizontal",
-                "actions": [
-                    {
-                        "type": "button",
-                        "text": "View",
-                        "url": postUrl,
-                    }
-                ]
+                "actions": actions,
             }
         ]
     };
