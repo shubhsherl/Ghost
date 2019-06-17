@@ -3,6 +3,7 @@ const request = require('request');
 const {forEach} = require('lodash');
 const models = require('../../../../models');
 const common = require('../../../../lib/common');
+const settingsCache = require('../../../../services/settings/cache');
 const api = require('./api');
 
 function getIdToken(req) {
@@ -153,7 +154,7 @@ module.exports = {
     collaborate(id, token, rcId, postId, post) {
         const failResult = {collaborate: false};
 
-        if (id !== rcId)
+        if (id !== rcId || !settingsCache.get('can_collaborate'))
             return failResult;
 
         return models.Post.findOne({ id: postId, collaborate: 1}, getOptions(post.authors[0])).then((p) => {

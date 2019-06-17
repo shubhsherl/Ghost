@@ -11,7 +11,7 @@ module.exports = (post) => {
     const avatar = imageLib.blogIcon.getIconUrl(true);
     const blogUrl = utils.getBlogUrl();
     const postUrl = `${blogUrl}${post.slug}`;
-    const collaborateUrl = `${blogUrl}/ghost/editor/post/${post.id}`;
+    const collaborateUrl = `${blogUrl}ghost/editor/post/${post.id}`;
     let actions = [{
         "type": "button",
         "text": "View",
