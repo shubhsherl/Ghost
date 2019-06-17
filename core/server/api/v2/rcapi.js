@@ -69,6 +69,7 @@ module.exports = {
         permissions: false,
         query(frame) {
             const {rc_id, post_id, post} = frame.data.collaboration[0]
+            
             return rcUtils.collaborate(frame.original.rc_uid, frame.original.rc_token, rc_id, post_id, post)
                 .then((res) => {
                     return res;

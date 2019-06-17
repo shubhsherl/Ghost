@@ -17,6 +17,33 @@ function getIdToken(req) {
     return { id, token };
 }
 
+function getOptions(userId) {
+    return {
+        context:
+        {
+            internal: false,
+            external: false,
+            user: userId,
+            api_key: null,
+            app: null,
+            integration: null,
+            public: false
+        },
+        filter: '(page:false)+status:[published]',
+        formats: 'mobiledoc',
+        withRelated: ['tags', 'authors']
+    };
+}
+
+// TODO: should get the embedded relation from client-side
+function getpost(model, post, user) {
+    let newPost = model.toJSON();
+    newPost.authors.push(user.toJSON());
+    post.authors = newPost.authors;
+    post.tags = newPost.tags;
+    return post;
+}
+
 module.exports = {
     checkAdmin(url, id, token) {
         let user;
@@ -123,26 +150,33 @@ module.exports = {
             });
     },
 
-    collaborate(id, token, rcId, postId, posts) {
+    // post contains the json of post without embedding the relations
+    collaborate(id, token, rcId, postId, post) {
         const failResult = {collaborate: false};
 
         if (id !== rcId)
             return failResult;
 
-        return models.Post.findOne({ id: postId}).then((post) => {
-            if (!post || !post.get('collaborate')) {
+        return models.Post.findOne({ id: postId, collaborate: 1}, getOptions(post.authors[0])).then((p) => {
+
+            if (!p) {
                 return failResult;
             }
+
             return models.User.findOne({ rc_id: id }).then((user) => {
                 if (!user) {
                     return failResult;
                 }
-                return this.validateSubscription(id, token, post.get('room_id'))
+
+                return this.validateSubscription(id, token, p.get('room_id'))
                     .then((s) => {
                         if (s.exist) {
-                            // return models.Post.edit(posts);
+                            return models.Post.edit(getpost(p, post, user), {id: postId}).then((p) => {
+                                return {collaborate: true};
+                            });
+                        } else {
+                            return failResult;
                         }
-                        return {collaborate: s.exist};
                     });
                 });
         })
@@ -247,6 +281,7 @@ module.exports = {
         return new Promise((resolve) => {
             request.get({ url: api.buildSubscriptionQuery(roomId), headers: api.getHeader(id, token) }, function (e, r, body) {
                 let result;
+
                 if (body)
                     result = JSON.parse(body);
                 subscription = {exist: result && result.success && !!result.subscription};
