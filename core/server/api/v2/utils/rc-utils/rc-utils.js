@@ -154,12 +154,9 @@ module.exports = {
     collaborate(id, token, rcId, postId, post) {
         const failResult = {collaborate: false};
 
-        if (id !== rcId || !settingsCache.get('can_collaborate'))
-            return failResult;
-
         return models.Post.findOne({ id: postId, collaborate: 1}, getOptions(post.authors[0])).then((p) => {
-
-            if (!p) {
+            
+            if (!p || id !== rcId || !settingsCache.get('can_collaborate')) {
                 return failResult;
             }
 
