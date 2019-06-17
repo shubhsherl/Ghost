@@ -3,6 +3,7 @@ const request = require('request');
 const {forEach} = require('lodash');
 const models = require('../../../../models');
 const common = require('../../../../lib/common');
+const settingsCache = require('../../../../services/settings/cache');
 const api = require('./api');
 
 function getIdToken(req) {
@@ -179,8 +180,13 @@ module.exports = {
 
     createDiscussion(id, token, title, username) {
         const failResult = {type: 'discussion_rooms',created: false};
+        
         let response;
         return new Promise((resolve) => {
+            if (!settingsCache.get('is_comments')) {
+                resolve(failResult);
+            }
+            
             this.getSelfRoom(id, token, username).then((room) => {
                 console.log(room);
                 if (room.exist) {
