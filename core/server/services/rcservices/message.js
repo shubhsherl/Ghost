@@ -26,7 +26,6 @@ module.exports = (post) => {
             "url": `/channel/${post.discussion_room_name}`
         });
     }
-
     if (post.collaborate) {
         actions.push({
             "type": "button",
