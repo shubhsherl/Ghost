@@ -293,24 +293,6 @@ module.exports = {
         updated_at: {type: 'dateTime', nullable: true},
         updated_by: {type: 'string', maxlength: 24, nullable: true}
     },
-    invites: {
-        id: {type: 'string', maxlength: 24, nullable: false, primary: true},
-        role_id: {type: 'string', maxlength: 24, nullable: false},
-        status: {
-            type: 'string',
-            maxlength: 50,
-            nullable: false,
-            defaultTo: 'pending',
-            validations: {isIn: [['pending', 'sent']]}
-        },
-        token: {type: 'string', maxlength: 191, nullable: false, unique: true},
-        email: {type: 'string', maxlength: 191, nullable: false, unique: true, validations: {isEmail: true}},
-        expires: {type: 'bigInteger', nullable: false},
-        created_at: {type: 'dateTime', nullable: false},
-        created_by: {type: 'string', maxlength: 24, nullable: false},
-        updated_at: {type: 'dateTime', nullable: true},
-        updated_by: {type: 'string', maxlength: 24, nullable: true}
-    },
     brute: {
         key: {type: 'string', maxlength: 191},
         firstRequest: {type: 'bigInteger'},
