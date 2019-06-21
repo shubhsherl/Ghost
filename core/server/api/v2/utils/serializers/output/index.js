@@ -35,10 +35,6 @@ module.exports = {
         return require('./posts');
     },
 
-    get invites() {
-        return require('./invites');
-    },
-
     get rcapi() {
         return require('./rcapi');
     },
