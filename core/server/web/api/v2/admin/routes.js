@@ -213,8 +213,11 @@ module.exports = function apiRoutes() {
     router.del('/invites/:id', mw.authAdminApi, http(apiv2.invites.destroy));
 
     // ## RC Api
-    router.get('/rcapi', mw.authAdminApi, http(apiv2.rcapi.browse)); // No need for checking persmissions
-    router.post('/rcapi/discussion', mw.authAdminApi, http(apiv2.rcapi.discussion)); // No need for checking persmissions
+    router.get('/rcapi', mw.authAdminApi, http(apiv2.rcapi.browse));
+    router.post('/rcapi/discussion', mw.authAdminApi, http(apiv2.rcapi.discussion));
+    
+    // ## RC Incoming Webhook
+    router.post('/rhooks/:id/:token', http(apiv2.rhooks.callbacks));
 
     // ## Redirects (JSON based)
     router.get('/redirects/json', mw.authAdminApi, http(apiv2.redirects.download));

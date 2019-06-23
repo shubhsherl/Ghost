@@ -67,7 +67,7 @@ function setupTasks(setupData) {
         const blogTitle = setupData['setup'][0].blogTitle;
         const rcUrl = setupData['setup'][0].rc_url;
         const announceToken = setupData['setup'][0].announce_token;
-        const collabToken = setupData['setup'][0].collaboration_token;
+        const settingsToken = setupData['setup'][0].settings_token;
         return rcUtils.checkAdmin(rcUrl, id, token).then((data) => {
             const email = data.emails[0].address;
             return {
@@ -79,7 +79,7 @@ function setupTasks(setupData) {
                 password: "qwe123qwe123",//TODO set random password
                 blogTitle: blogTitle,
                 announce_token: announceToken,
-                collaboration_token: collabToken,
+                settings_token: settingsToken,
                 serverUrl: rcUrl,
                 status: 'active'
             };
@@ -111,7 +111,7 @@ function setupTasks(setupData) {
             blogTitle = data.userData.blogTitle,
             serverUrl = data.userData.serverUrl,
             announceToken = data.userData.announce_token,
-            collabToken = data.userData.collaboration_token,
+            settingsToken = data.userData.settings_token,
             context = {context: {user: data.user.id}};
 
         let userSettings;
@@ -124,7 +124,7 @@ function setupTasks(setupData) {
             {key: 'server_url', value: serverUrl},
             {key: 'title', value: blogTitle.trim()},
             {key: 'announce_token', value: announceToken},
-            {key: 'collaboration_token', value: collabToken},
+            {key: 'settings_token', value: settingsToken},
             {key: 'description', value: common.i18n.t('common.api.authentication.sampleBlogDescription')}
         ];
 

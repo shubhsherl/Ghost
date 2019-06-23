@@ -113,8 +113,8 @@
         "announce_token": {
             "defaultValue": "hookid/tokentoannounce"
         },
-        "collaboration_token": {
-            "defaultValue": "hookid/tokentocollaborate"
+        "settings_token": {
+            "defaultValue": "hookid/tokentosyncdb"
         },
         "room_name": {
             "defaultValue": "general",

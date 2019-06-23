@@ -139,6 +139,7 @@ module.exports = {
                         exist: true,
                         rid: r._id,
                         roomname: r.name,
+                        type: r.t
                     };
                 } else {
                     room = {
