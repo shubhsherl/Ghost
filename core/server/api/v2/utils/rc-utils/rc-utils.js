@@ -9,22 +9,35 @@ const api = require('./api');
 function getIdToken(req) {
     let id, token;
     forEach(req.headers.cookie.split(';'), (v) => {
-        if (v.includes('rc_uid'))
+        if (v.includes('rc_uid')) {
             id = v.split('=')[1];
-        if (v.includes('rc_token'))
+        }
+        if (v.includes('rc_token')) {
             token = v.split('=')[1];
+        }
     });
-    return { id, token };
+    return {id, token};
+}
+
+function addRoom(room) {
+    const params = {rid: room.rid, name: room.roomname, type: room.type};
+    models.Room.findOne({rid: room.rid}).then((r) => {
+        if (r) {
+            r.save(params, {method: 'update'});
+        } else {
+            models.Room.add(params);
+        }
+    });
 }
 
 module.exports = {
     checkAdmin(url, id, token) {
         let user;
         return new Promise((resolve) => {
-            request.get({ url: api.buildMeUrl(url), headers: api.getHeader(id, token) }, function (e, r, body) {
+            request.get({url: api.buildMeUrl(url), headers: api.getHeader(id, token)}, function (e, r, body) {
                 user = JSON.parse(body);
                 if (user.success) {
-                    if (user.roles.indexOf('admin') == -1) {
+                    if (user.roles.indexOf('admin') === -1) {
                         //callee is not admin on RC
                         return Promise.reject(new common.errors.GhostError({
                             message: 'Callee is not an admin, cannot Setup Ghost'
@@ -37,21 +50,22 @@ module.exports = {
                 }
                 resolve(user);
             });
-        })
+        });
     },
 
     getUser(id, token, username) {
         let user;
         return new Promise((resolve) => {
-            request.get({ url: api.buildUserQuery(username), headers: api.getHeader(id, token) }, function (e, r, body) {
+            request.get({url: api.buildUserQuery(username), headers: api.getHeader(id, token)}, function (e, r, body) {
                 let result;
-                if (body)
+                if (body) {
                     result = JSON.parse(body);
+                }
                 if (result && result.success) {
                     user = result;
                 } else {
                     user = {
-                        success: false,
+                        success: false
                     };
                 }
                 resolve(user);
@@ -62,15 +76,16 @@ module.exports = {
     getMe(id, token) {
         let user;
         return new Promise((resolve) => {
-            request.get({ url: api.buildMeUrl(), headers: api.getHeader(id, token) }, function (e, r, body) {
+            request.get({url: api.buildMeUrl(), headers: api.getHeader(id, token)}, function (e, r, body) {
                 let result;
-                if (body)
+                if (body) {
                     result = JSON.parse(body);
+                }
                 if (result && result.success) {
                     user = result;
                 } else {
                     user = {
-                        success: false,
+                        success: false
                     };
                 }
                 resolve(user);
@@ -81,22 +96,21 @@ module.exports = {
     validateUser(id, token, userName) {
         let user;
         return new Promise((resolve) => {
-            request.get({ url: api.buildUserQuery(userName), headers: api.getHeader(id, token) }, function (e, r, body) {
+            request.get({url: api.buildUserQuery(userName), headers: api.getHeader(id, token)}, function (e, r, body) {
                 let result;
-                if (body)
+                if (body) {
                     result = JSON.parse(body);
+                }
                 if (result && result.success) {
-                    u = result.user;
+                    const u = result.user;
                     user = {
-                        type: 'rc_users',
                         exist: true,
                         uid: u._id,
-                        username: u.username,
+                        username: u.username
                     };
                 } else {
                     user = {
-                        type: 'rc_users',
-                        exist: false,
+                        exist: false
                     };
                 }
                 resolve(user);
@@ -105,10 +119,11 @@ module.exports = {
     },
 
     createSession(req) {
-        const { id, token } = getIdToken(req);
-        if (!id || !token)
+        const {id, token} = getIdToken(req);
+        if (!id || !token) {
             return req;
-        return models.User.findOne({ rc_id: id }).then((user) => {
+        }
+        return models.User.findOne({rc_id: id}).then((user) => {
             if (!user) {
                 return req;
             }
@@ -120,31 +135,31 @@ module.exports = {
                     req.user = user;
                     return req;
                 });
-            });
+        });
     },
     
     validateRoom(id, token, roomName) {
         let room;
         return new Promise((resolve) => {
-            request.get({ url: api.buildRoomQuery(roomName), headers: api.getHeader(id, token) }, function (e, r, body) {
+            request.get({url: api.buildRoomQuery(roomName), headers: api.getHeader(id, token)}, function (e, r, body) {
                 let result;
 
-                if (body)
+                if (body) {
                     result = JSON.parse(body);
+                }
 
                 if (result && result.success) {
                     r = result.room;
                     room = {
-                        type: 'rc_rooms',
                         exist: true,
                         rid: r._id,
                         roomname: r.name,
                         type: r.t
                     };
+                    addRoom(room);
                 } else {
                     room = {
-                        type: 'rc_rooms',
-                        exist: false,
+                        exist: false
                     };
                 }
                 resolve(room);
@@ -155,23 +170,21 @@ module.exports = {
     getSelfRoom(id, token, username) {
         let room;
         return new Promise((resolve) => {
-            request.post({ url: api.buildParentRoomQuery(), form: {"username": username}, headers: api.getHeader(id, token) }, function (e, r, body) {
+            request.post({url: api.buildParentRoomQuery(), form: {username: username}, headers: api.getHeader(id, token)}, function (e, r, body) {
                 let result;
                 
-                if (body)
+                if (body) {
                     result = JSON.parse(body);
-                console.log(result);
+                }
                 if (result && result.success) {
                     r = result.room;
                     room = {
-                        type: 'rc_rooms',
                         exist: true,
-                        rid: r._id,
+                        rid: r._id
                     };
                 } else {
                     room = {
-                        type: 'rc_rooms',
-                        exist: false,
+                        exist: false
                     };
                 }
                 resolve(room);
@@ -179,8 +192,8 @@ module.exports = {
         });
     },
 
-    createDiscussion(id, token, title, username) {
-        const failResult = {type: 'discussion_rooms',created: false};
+    createDiscussion(id, token, title, username, type = 'c') {
+        const failResult = {created: false};
         
         let response;
         return new Promise((resolve) => {
@@ -189,30 +202,29 @@ module.exports = {
             }
             
             this.getSelfRoom(id, token, username).then((room) => {
-                console.log(room);
                 if (room.exist) {
-                    request.post({ url: api.buildDiscussionUrl(), form: {"prid": room.rid, "t_name": title, "t": "c"}, headers: api.getHeader(id, token) }, function (e, r, body) {
+                    request.post({url: api.buildDiscussionUrl(), form: {prid: room.rid, t_name: title, t: type}, headers: api.getHeader(id, token)}, function (e, r, body) {
                         let result;
 
-                        if (body)
+                        if (body) {
                             result = JSON.parse(body);
-                        console.log(result);
+                        }
                         if (result && result.success) {
                             r = result.discussion;
                             response = {
-                                type: 'discussion_rooms',
                                 created: true,
                                 rid: r._id,
-                                roomname: r.fname,
-                                name: r.name
+                                roomname: r.name,
+                                type: r.t
                             };
+                            addRoom(response);
                         } else {
                             response = failResult;
                         }
                         resolve(response);
                     });
                 } else {
-                resolve(failResult);
+                    resolve(failResult);
                 }
             });
         });

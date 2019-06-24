@@ -13,9 +13,7 @@ module.exports = {
         id: {type: 'string', maxlength: 24, nullable: false, primary: true},
         uuid: {type: 'string', maxlength: 36, nullable: false, validations: {isUUID: true}},
         room_id: {type: 'string', maxlength: 17, nullable: true, unique: false},
-        room_name: {type: 'string', maxlength: 256, nullable: true, unique: false},
         discussion_room_id: {type: 'string', maxlength: 17, nullable: true, unique: false},
-        discussion_room_name: {type: 'string', maxlength: 256, nullable: true, unique: false},
         title: {type: 'string', maxlength: 2000, nullable: false, validations: {isLength: {max: 255}}},
         slug: {type: 'string', maxlength: 191, nullable: false, unique: true},
         mobiledoc: {type: 'text', maxlength: 1000000000, fieldtype: 'long', nullable: true},
@@ -193,6 +191,12 @@ module.exports = {
         post_id: {type: 'string', maxlength: 24, nullable: false, references: 'posts.id'},
         tag_id: {type: 'string', maxlength: 24, nullable: false, references: 'tags.id'},
         sort_order: {type: 'integer', nullable: false, unsigned: true, defaultTo: 0}
+    },
+    rooms: {
+        id: {type: 'string', maxlength: 24, nullable: false, primary: true},
+        rid: {type: 'string', maxlength: 17, nullable: false, unique: true},
+        name: {type: 'string', maxlength: 191, nullable: false, unique: true},
+        type: {type: 'string', maxlength: 1, nullable: false, validations: {isIn: [['c', 'p']]}}
     },
     apps: {
         id: {type: 'string', maxlength: 24, nullable: false, primary: true},

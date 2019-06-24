@@ -33,4 +33,4 @@ module.exports = {
             'X-User-Id': id
         };
     }
-}
+};
