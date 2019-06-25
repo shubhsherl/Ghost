@@ -159,7 +159,7 @@ module.exports = {
                 
                 if (body)
                     result = JSON.parse(body);
-                console.log(result);
+
                 if (result && result.success) {
                     r = result.room;
                     room = {
@@ -178,7 +178,7 @@ module.exports = {
         });
     },
 
-    createDiscussion(id, token, title, username) {
+    createDiscussion(id, token, title, username, type = 'c') {
         const failResult = {type: 'discussion_rooms',created: false};
         
         let response;
@@ -188,14 +188,13 @@ module.exports = {
             }
             
             this.getSelfRoom(id, token, username).then((room) => {
-                console.log(room);
                 if (room.exist) {
-                    request.post({ url: api.buildDiscussionUrl(), form: {"prid": room.rid, "t_name": title, "t": "c"}, headers: api.getHeader(id, token) }, function (e, r, body) {
+                    request.post({ url: api.buildDiscussionUrl(), form: {"prid": room.rid, "t_name": title, "t": type}, headers: api.getHeader(id, token) }, function (e, r, body) {
                         let result;
 
                         if (body)
                             result = JSON.parse(body);
-                        console.log(result);
+                            
                         if (result && result.success) {
                             r = result.discussion;
                             response = {

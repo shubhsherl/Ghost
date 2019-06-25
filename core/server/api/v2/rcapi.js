@@ -48,8 +48,9 @@ module.exports = {
         permissions: false,
         query(frame) {
             const username = frame.user.get('rc_username');
-            const {title} = frame.data.room[0];
-            return rcUtils.createDiscussion(frame.original.rc_uid, frame.original.rc_token, title, username)
+            const {title, type} = frame.data.room[0];
+            
+            return rcUtils.createDiscussion(frame.original.rc_uid, frame.original.rc_token, title, username, type)
                 .then((room) => {
                     return room;
                 });
