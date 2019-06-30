@@ -464,6 +464,11 @@ authentication = {
         let tasks;
         const options = {context: {internal: true}, withRelated: ['roles']};
         const localOptions = {context: {internal: true}};
+
+        if (invitation.user[0].created_by) {
+            localOptions.context.user = invitation.user[0].created_by;
+        }
+
         // 1. if admin adds user, option.
         // 2. if user creating account, invitation.
         const rcUid = option.rc_uid || invitation.user[0].rc_uid;
