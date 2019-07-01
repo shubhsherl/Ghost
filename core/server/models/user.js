@@ -694,7 +694,7 @@ User = ghostBookshelf.Model.extend({
                 hasUserPermission = loadedPermissions.user && _.some(loadedPermissions.user.roles, {name: 'Owner'});
             } else if (loadedPermissions.user && _.some(loadedPermissions.user.roles, {name: 'Editor'})) {
                 // If the user we are trying to edit is an Author or Contributor, allow it
-                hasUserPermission = userModel.hasRole('Author') || userModel.hasRole('Contributor');
+                hasUserPermission = userModel.hasRole('Contributor') && userModel.get('created_by') === context.user;
             }
         }
 
@@ -709,7 +709,7 @@ User = ghostBookshelf.Model.extend({
             // Users with the role 'Editor' have complex permissions when the action === 'destroy'
             if (loadedPermissions.user && _.some(loadedPermissions.user.roles, {name: 'Editor'})) {
                 // Alternatively, if the user we are trying to edit is an Author, allow it
-                hasUserPermission = context.user === userModel.get('id') || userModel.hasRole('Author') || userModel.hasRole('Contributor');
+                hasUserPermission = context.user === userModel.get('id') || (userModel.hasRole('Contributor') && userModel.get('created_by') === context.user);
             }
         }
 

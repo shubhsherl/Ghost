@@ -1,5 +1,5 @@
 const Promise = require('bluebird'),
-    {extend, merge, omit, cloneDeep, assign} = require('lodash'),
+    {extend, merge, omit, cloneDeep, assign, forEach} = require('lodash'),
     validator = require('validator'),
     config = require('../../config'),
     common = require('../../lib/common'),
@@ -27,6 +27,20 @@ function checkSetup() {
     return authentication.isSetup().then((result) => {
         return result.setup[0].status;
     });
+}
+
+/**
+ * Returns a verified email, if exist
+ *
+ * @return {String}
+ */
+function getVerifiedEmail(emails) {
+    let email = emails[0].address;
+    forEach(emails, (e) => {
+        if(e.verified) 
+            email = e.address;
+    });
+    return email;
 }
 
 /**
@@ -69,13 +83,12 @@ function setupTasks(setupData) {
         const announceToken = setupData.setup[0].announce_token;
         const settingsToken = setupData.setup[0].settings_token;
         return rcUtils.checkAdmin(rcUrl, id, token).then((data) => {
-            const email = data.emails[0].address;
             return {
                 name: data.name,
                 rc_id: id,
                 rc_username: data.username,
                 profile_image: data.avatarUrl, 
-                email: email,
+                email: getVerifiedEmail(data.emails),
                 password: 'qwe123qwe123',//TODO set random password
                 blogTitle: blogTitle,
                 announce_token: announceToken,
@@ -508,7 +521,7 @@ authentication = {
                         if (!u.emails){
                             throw new common.errors.NotFoundError({message: 'Cannot create account without email.'});
                         }
-                        const email = u.emails[0].address;
+                        const email = getVerifiedEmail(u.emails);
                         const role = data.role.name || 'Author';
                         return models.Role.findOne({name: role})
                             .then((r) => {

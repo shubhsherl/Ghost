@@ -56,7 +56,7 @@ module.exports = {
     getUser(id, token, username) {
         let user;
         return new Promise((resolve) => {
-            request.get({url: api.buildUserQuery(username), headers: api.getHeader(id, token)}, function (e, r, body) {
+            request.post({url: api.buildUserQueryByToken(), form: {username}, headers: api.getHeader(id, token)}, function (e, r, body) {
                 let result;
                 if (body) {
                     result = JSON.parse(body);
@@ -124,7 +124,7 @@ module.exports = {
             return req;
         }
         return models.User.findOne({rc_id: id}).then((user) => {
-            if (!user) {
+            if (!user || user.get('status') !== 'active') {
                 return req;
             }
             return this.getMe(id, token)
