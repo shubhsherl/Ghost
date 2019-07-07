@@ -3,7 +3,7 @@ const common = require('../../lib/common');
 const models = require('../../models');
 const rcUtils = require('./utils/rc-utils');
 const permissionsService = require('../../services/permissions');
-const ALLOWED_INCLUDES = ['count.posts', 'permissions', 'roles', 'roles.permissions'];
+const ALLOWED_INCLUDES = ['count.posts', 'permissions', 'roles', 'parents', 'roles.permissions'];
 const UNSAFE_ATTRS = ['status', 'roles'];
 
 module.exports = {

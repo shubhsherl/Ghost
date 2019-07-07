@@ -20,7 +20,6 @@ module.exports = {
     },
 
     buildUserQueryByToken() {
-        console.log(this.getToken());
         return this.getRCUrl() + '/ghooks/' + this.getToken() + '/getUser';
     },
 

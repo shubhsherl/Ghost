@@ -64,7 +64,7 @@ const http = (apiImpl) => {
                 member: (req.member || null)
             }
         });
-
+        
         frame.configure({
             options: apiImpl.options,
             data: apiImpl.data

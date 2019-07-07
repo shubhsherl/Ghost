@@ -123,6 +123,11 @@ module.exports = {
         role_id: {type: 'string', maxlength: 24, nullable: false},
         user_id: {type: 'string', maxlength: 24, nullable: false}
     },
+    parents_users: {
+        id: {type: 'string', maxlength: 24, nullable: false, primary: true},
+        parent_id: {type: 'string', maxlength: 24, nullable: false},
+        user_id: {type: 'string', maxlength: 24, nullable: false}
+    },
     permissions: {
         id: {type: 'string', maxlength: 24, nullable: false, primary: true},
         name: {type: 'string', maxlength: 50, nullable: false, unique: true},
