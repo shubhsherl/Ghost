@@ -560,6 +560,38 @@
                     "author_id": "5951f5fca366002ebd5dbef7",
                     "custom_excerpt": "Welcome, it's great to have you here.\nWe know that first impressions are important, so we've populated your new site with some initial getting started posts that will help you get familiar with everything in no time.",
                     "feature_image": "https://static.ghost.org/v2.0.0/images/welcome-to-ghost.jpg"
+                },
+                {
+                    "title": "Authors",
+                    "slug": "authors",
+                    "mobiledoc": "{\"version\":\"0.3.1\",\"markups\":[],\"atoms\":[],\"cards\":[],\"sections\":[[1,\"p\",[[0,[],0,\"\"]]]]}",
+                    "featured": false,
+                    "page": true,
+                    "status": "published",
+                    "meta_title": null,
+                    "meta_description": null,
+                    "created_by": "1",
+                    "published_by": "1",
+                    "author_id": "1",
+                    "custom_excerpt": "",
+                    "custom_template": "custom-archive-authors",
+                    "feature_image": ""
+                },
+                {
+                    "title": "Tags",
+                    "slug": "tags",
+                    "mobiledoc": "{\"version\":\"0.3.1\",\"markups\":[],\"atoms\":[],\"cards\":[],\"sections\":[[1,\"p\",[[0,[],0,\"\"]]]]}",
+                    "featured": false,
+                    "page": true,
+                    "status": "published",
+                    "meta_title": null,
+                    "meta_description": null,
+                    "created_by": "1",
+                    "published_by": "1",
+                    "author_id": "1",
+                    "custom_excerpt": "",
+                    "custom_template": "custom-archive-tags",
+                    "feature_image": ""
                 }
             ]
         },
@@ -572,6 +604,14 @@
                     "description": "Built-in Zapier integration",
                     "type": "builtin",
                     "api_keys": [{"type": "admin"}]
+                },
+                {
+                    "name": "Search",
+                    "slug": "search",
+                    "icon_image": "https://images-na.ssl-images-amazon.com/images/I/41gYkruZM2L.png",
+                    "description": "This integration will help the Theme to Search Posts",
+                    "type": "builtin",
+                    "api_keys": [{"type": "content"}]
                 }
             ]
         }
