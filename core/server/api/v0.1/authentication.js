@@ -1,6 +1,7 @@
 const Promise = require('bluebird'),
     {extend, merge, omit, cloneDeep, assign, forEach} = require('lodash'),
     validator = require('validator'),
+    crypto = require('crypto'),
     config = require('../../config'),
     common = require('../../lib/common'),
     security = require('../../lib/security'),
@@ -87,9 +88,10 @@ function setupTasks(setupData) {
                 name: data.name,
                 rc_id: id,
                 rc_username: data.username,
+                slug: data.username,
                 profile_image: data.avatarUrl, 
                 email: getVerifiedEmail(data.emails),
-                password: 'qwe123qwe123',//TODO set random password
+                password: crypto.randomBytes(20).toString('hex'),
                 blogTitle: blogTitle,
                 announce_token: announceToken,
                 settings_token: settingsToken,
@@ -516,6 +518,7 @@ authentication = {
             const data = invitation.user[0];
             return rcUtils.getUser(rcUid, rcToken, data.rc_username)
                 .then((user) => {
+                    console.log(user.user);
                     if (user.success && user.user) {
                         const u = user.user;
                         if (!u.emails){
@@ -528,9 +531,11 @@ authentication = {
                                 return models.User.add({
                                     rc_id: u._id,
                                     rc_username: u.username,
+                                    profile_image: u.avatarUrl,
+                                    slug: u.username,
                                     email: email,
                                     name: u.name,
-                                    password: 'qwe123qwe123',//TODO Random password
+                                    password: crypto.randomBytes(20).toString('hex'),
                                     roles: [r]
                                 }, localOptions);
                             });

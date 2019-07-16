@@ -121,9 +121,8 @@ module.exports = {
     },
 
     getUser(id, token, username) {
-        let user;
         return new Promise((resolve) => {
-            request.get({url: api.buildUserQueryByToken(username), headers: api.getHeader(id, token)}, function (e, r, body) {
+            request.get({url: api.buildUserQueryByToken(), form: {username}, headers: api.getHeader(id, token)}, function (e, r, body) {
                 resolve(parseBody(body, 'getUser'));
             });
         });
