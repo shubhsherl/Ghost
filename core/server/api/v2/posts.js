@@ -81,6 +81,7 @@ module.exports = {
                                 return models.Room.findOne({rid: rid}).then((d) => {
                                     if (d) {
                                         model.attributes.discussion_room_name = d.get('name');
+                                        model.attributes.discussion_room_type = d.get('type');
                                     }
                                     return model;
                                 });

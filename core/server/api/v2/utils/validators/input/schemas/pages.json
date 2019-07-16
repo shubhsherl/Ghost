@@ -33,6 +33,10 @@
                     "type": ["string", "null"],
                     "maxLength": 256
                 },
+                "discussion_room_type": {
+                    "type": ["string", "null"],
+                    "maxLength": 1
+                },
                 "announce": {
                     "type": "boolean"
                 },

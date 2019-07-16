@@ -9,12 +9,25 @@ const api = require('./api');
 function getIdToken(req) {
     let id, token;
     forEach(req.headers.cookie.split(';'), (v) => {
-        if (v.includes('rc_uid'))
+        if (v.includes('rc_uid')) {
             id = v.split('=')[1];
-        if (v.includes('rc_token'))
+        }
+        if (v.includes('rc_token')) {
             token = v.split('=')[1];
+        }
     });
-    return { id, token };
+    return {id, token};
+}
+
+function addRoom(room) {
+    const params = {rid: room.rid, name: room.roomname, type: room.type};
+    models.Room.findOne({rid: room.rid}).then((r) => {
+        if (r) {
+            r.save(params, {method: 'update'});
+        } else {
+            models.Room.add(params);
+        }
+    });
 }
 
 function getOptions(userId) {
@@ -44,14 +57,54 @@ function getpost(model, post, user) {
     return post;
 }
 
+function parseBody(body, type) {
+    const failResult = {success: false, exist: false, created: false};
+    let result;
+
+    if (body) {
+        result = JSON.parse(body);
+    }
+
+    if (!result || !result.success) {
+        return failResult;
+    }
+
+    switch (type) {
+        case 'getUser':
+            return result;
+        case 'validateUser':
+            return {
+                exist: true,
+                uid: result.user._id,
+                username: result.user.username,
+            };
+        case 'validateRoom':
+        case 'validateSelfRoom':
+            const r = result.room || result.discussion;
+            const room = {
+                exist: result.room ? true : false,
+                created: result.discussion ? true : false,
+                rid: r._id,
+                roomname: r.name,
+                type: r.t
+            };
+            if (type === 'validateRoom') {
+                addRoom(room);
+            }
+            return room;
+        default:
+            return failResult;
+    }
+}
+
 module.exports = {
     checkAdmin(url, id, token) {
         let user;
         return new Promise((resolve) => {
-            request.get({ url: api.buildMeUrl(url), headers: api.getHeader(id, token) }, function (e, r, body) {
+            request.get({url: api.buildMeUrl(url), headers: api.getHeader(id, token)}, function (e, r, body) {
                 user = JSON.parse(body);
                 if (user.success) {
-                    if (user.roles.indexOf('admin') == -1) {
+                    if (user.roles.indexOf('admin') === -1) {
                         //callee is not admin on RC
                         return Promise.reject(new common.errors.GhostError({
                             message: 'Callee is not an admin, cannot Setup Ghost'
@@ -64,69 +117,30 @@ module.exports = {
                 }
                 resolve(user);
             });
-        })
+        });
     },
 
     getUser(id, token, username) {
         let user;
         return new Promise((resolve) => {
-            request.get({ url: api.buildUserQuery(username), headers: api.getHeader(id, token) }, function (e, r, body) {
-                let result;
-                if (body)
-                    result = JSON.parse(body);
-                if (result && result.success) {
-                    user = result;
-                } else {
-                    user = {
-                        success: false,
-                    };
-                }
-                resolve(user);
+            request.get({url: api.buildUserQueryByToken(username), headers: api.getHeader(id, token)}, function (e, r, body) {
+                resolve(parseBody(body, 'getUser'));
             });
         });
     },
 
     getMe(id, token) {
-        let user;
         return new Promise((resolve) => {
-            request.get({ url: api.buildMeUrl(), headers: api.getHeader(id, token) }, function (e, r, body) {
-                let result;
-                if (body)
-                    result = JSON.parse(body);
-                if (result && result.success) {
-                    user = result;
-                } else {
-                    user = {
-                        success: false,
-                    };
-                }
-                resolve(user);
+            request.get({url: api.buildMeUrl(), headers: api.getHeader(id, token)}, function (e, r, body) {
+                resolve(parseBody(body, 'getUser'));
             });
         });
     },
 
     validateUser(id, token, userName) {
-        let user;
         return new Promise((resolve) => {
-            request.get({ url: api.buildUserQuery(userName), headers: api.getHeader(id, token) }, function (e, r, body) {
-                let result;
-                if (body)
-                    result = JSON.parse(body);
-                if (result && result.success) {
-                    u = result.user;
-                    user = {
-                        type: 'rc_users',
-                        exist: true,
-                        uid: u._id,
-                        username: u.username,
-                    };
-                } else {
-                    user = {
-                        type: 'rc_users',
-                        exist: false,
-                    };
-                }
-                resolve(user);
+            request.get({url: api.buildUserQuery(userName), headers: api.getHeader(id, token)}, function (e, r, body) {
+                resolve(parseBody(body, 'validateUser'));
             });
         });
     },
@@ -135,7 +149,7 @@ module.exports = {
         const { id, token } = getIdToken(req);
         if (!id || !token)
             return req;
-        return models.User.findOne({ rc_id: id }).then((user) => {
+        return models.User.findOne({rc_id: id}).then((user) => {
             if (!user) {
                 return req;
             }
@@ -154,7 +168,7 @@ module.exports = {
     collaborate(id, token, rcId, postId, post) {
         const failResult = {collaborate: false};
 
-        return models.Post.findOne({ id: postId, collaborate: 1}, getOptions(post.authors[0])).then((p) => {
+        return models.Post.findOne({id: postId, collaborate: 1}, getOptions(post.authors[0])).then((p) => {
             
             if (!p || id !== rcId || !settingsCache.get('can_collaborate')) {
                 return failResult;
@@ -180,94 +194,36 @@ module.exports = {
     },
     
     validateRoom(id, token, roomName) {
-        let room;
         return new Promise((resolve) => {
-            request.get({ url: api.buildRoomQuery(roomName), headers: api.getHeader(id, token) }, function (e, r, body) {
-                let result;
-
-                if (body)
-                    result = JSON.parse(body);
-
-                if (result && result.success) {
-                    r = result.room;
-                    room = {
-                        type: 'rc_rooms',
-                        exist: true,
-                        rid: r._id,
-                        roomname: r.name,
-                    };
-                } else {
-                    room = {
-                        type: 'rc_rooms',
-                        exist: false,
-                    };
-                }
-                resolve(room);
+            request.get({url: api.buildRoomQuery(roomName), headers: api.getHeader(id, token)}, function (e, r, body) {
+                resolve(parseBody(body, 'validateRoom'));
             });
         });
     },
 
     getSelfRoom(id, token, username) {
-        let room;
         return new Promise((resolve) => {
-            request.post({ url: api.buildParentRoomQuery(), form: {"username": username}, headers: api.getHeader(id, token) }, function (e, r, body) {
-                let result;
-                
-                if (body)
-                    result = JSON.parse(body);
-                console.log(result);
-                if (result && result.success) {
-                    r = result.room;
-                    room = {
-                        type: 'rc_rooms',
-                        exist: true,
-                        rid: r._id,
-                    };
-                } else {
-                    room = {
-                        type: 'rc_rooms',
-                        exist: false,
-                    };
-                }
-                resolve(room);
+            request.post({url: api.buildParentRoomQuery(), form: {"username": username}, headers: api.getHeader(id, token)}, function (e, r, body) {
+                resolve(parseBody(body, 'validateSelfRoom'));
             });
         });
     },
 
-    createDiscussion(id, token, title, username) {
-        const failResult = {type: 'discussion_rooms',created: false};
+    createDiscussion(id, token, title, username, type = 'c') {
+        const failResult = {created: false};
         
-        let response;
         return new Promise((resolve) => {
             if (!settingsCache.get('is_comments')) {
                 resolve(failResult);
             }
             
             this.getSelfRoom(id, token, username).then((room) => {
-                console.log(room);
                 if (room.exist) {
-                    request.post({ url: api.buildDiscussionUrl(), form: {"prid": room.rid, "t_name": title, "t": "c"}, headers: api.getHeader(id, token) }, function (e, r, body) {
-                        let result;
-
-                        if (body)
-                            result = JSON.parse(body);
-                        console.log(result);
-                        if (result && result.success) {
-                            r = result.discussion;
-                            response = {
-                                type: 'discussion_rooms',
-                                created: true,
-                                rid: r._id,
-                                roomname: r.fname,
-                                name: r.name
-                            };
-                        } else {
-                            response = failResult;
-                        }
-                        resolve(response);
+                    request.post({url: api.buildDiscussionUrl(), form: {prid: room.rid, t_name: title, t: type}, headers: api.getHeader(id, token)}, function (e, r, body) {
+                        resolve(parseBody(body, 'validateRoom'));
                     });
                 } else {
-                resolve(failResult);
+                    resolve(failResult);
                 }
             });
         });
@@ -276,7 +232,7 @@ module.exports = {
     validateSubscription(id, token, roomId) {
         let subscription;
         return new Promise((resolve) => {
-            request.get({ url: api.buildSubscriptionQuery(roomId), headers: api.getHeader(id, token) }, function (e, r, body) {
+            request.get({url: api.buildSubscriptionQuery(roomId), headers: api.getHeader(id, token)}, function (e, r, body) {
                 let result;
 
                 if (body)
