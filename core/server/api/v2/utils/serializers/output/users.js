@@ -17,12 +17,22 @@ module.exports = {
     exist(model, apiConfig, frame) {
         debug('exist');
         
-        frame.response = {
-            users: [{
-                exist: model ? true : false,
-                status: model ? model.status : 'inactive'
-            }]
-        };
+        if (!model) {
+            frame.response = {
+                users: [{
+                    exist: false
+                }]
+            };
+        } else {
+            const user = model.toJSON(frame.options);
+            frame.response = {
+                users: [{
+                    exist: true,
+                    status: user.status,
+                    slug: user.slug
+                }]
+            };
+        }
 
         debug(frame.response);
     },

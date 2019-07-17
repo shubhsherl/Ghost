@@ -1,3 +1,4 @@
+const getExcerpt = require('../../data/meta/excerpt');
 const imageLib = require('../../lib/image');
 const utils = require('../../services/url/utils');
 const urlService = require('../../services/url');
@@ -18,11 +19,13 @@ module.exports = (post) => {
         url: postUrl,
     }];
 
-    if (post.discussion_room_id && post.discussion_room_name) {
+    if (post.discussion_room_id) {
         actions.push({
             type: 'button',
             text: 'Discussion',
-            url: `/channel/${post.discussion_room_name}`
+            msg_processing_type: 'openRoom',
+            open_room_by_id: true,
+            rid: post.discussion_room_id,
         });
     }
 
@@ -33,11 +36,8 @@ module.exports = (post) => {
             url: collaborateUrl,
         });
 
-    let image = post.rc_image ? post.rc_image : (post.feature_image ? post.feature_image : settingsCache.get('cover_image'));
-    let shortDescription = post.html.replace(/<[^>]*>?/gm, ' ');
-    
-    image = handleImageUrl(image);
-    shortDescription = shortDescription.length > 500 ? `${shortDescription.substring(1, 500)}...` : shortDescription;
+    const image = post.rc_image ? post.rc_image : (post.feature_image ? post.feature_image : settingsCache.get('cover_image'));
+    const shortDescription = post.html ? getExcerpt(post.html, {words: 500}) : 'No Description';
     
     return {
         alias: settingsCache.get('title'),
@@ -49,7 +49,7 @@ module.exports = (post) => {
             {
                 title: post.rc_title || post.title,
                 description: post.rc_description || shortDescription,
-                image_url: image,
+                image_url: handleImageUrl(image),
                 button_alignment: 'horizontal',
                 actions: actions
             }

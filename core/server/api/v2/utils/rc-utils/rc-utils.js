@@ -149,7 +149,7 @@ module.exports = {
         if (!id || !token)
             return req;
         return models.User.findOne({rc_id: id}).then((user) => {
-            if (!user) {
+            if (!user || user.get('status') === 'inactive') {
                 return req;
             }
             return this.getMe(id, token)
