@@ -50,6 +50,10 @@ module.exports = {
         this.browse(...arguments);
     },
 
+    inviteOnly() {
+        this.browse(...arguments);
+    },
+
     edit(models, apiConfig, frame) {
         const settingsKeyedJSON = _.keyBy(_.invokeMap(models, 'toJSON'), 'key');
         this.browse(settingsKeyedJSON, apiConfig, frame);

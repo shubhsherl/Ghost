@@ -14,6 +14,19 @@ module.exports = {
         debug(frame.response);
     },
 
+    exist(model, apiConfig, frame) {
+        debug('exist');
+        
+        frame.response = {
+            users: [{
+                exist: model?true:false,
+                status: model?model.status:'inactive'
+            }]
+        };
+
+        debug(frame.response);
+    },
+
     read(model, apiConfig, frame) {
         debug('read');
 

@@ -47,6 +47,10 @@ module.exports = {
         return shared.pipeline(require('./invites'), localUtils);
     },
 
+    get rcapi() {
+        return shared.pipeline(require('./rcapi'), localUtils);
+    },
+
     get mail() {
         return shared.pipeline(require('./mail'), localUtils);
     },

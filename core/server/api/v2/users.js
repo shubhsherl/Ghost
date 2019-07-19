@@ -1,6 +1,7 @@
 const Promise = require('bluebird');
 const common = require('../../lib/common');
 const models = require('../../models');
+const rcUtils = require('./utils/rc-utils');
 const permissionsService = require('../../services/permissions');
 const ALLOWED_INCLUDES = ['count.posts', 'permissions', 'roles', 'roles.permissions'];
 const UNSAFE_ATTRS = ['status', 'roles'];
@@ -28,6 +29,35 @@ module.exports = {
         permissions: true,
         query(frame) {
             return models.User.findPage(frame.options);
+        }
+    },
+
+    // TODO: find a better way to check if this setting
+    // Maybe add a setting in RC and keep both in sync.
+    exist: {
+        options: [],
+        data: [
+            'user'
+        ],
+        validation: {
+            options: {
+                include: []
+            }
+        },
+        permissions: false,
+        query(frame) {
+            const option = frame.data.user[0];
+            const localOptions = {context: {internal: true}};
+            return rcUtils.getMe(option.rc_uid, option.rc_token)
+                .then((u) => {
+                    if (!u.success) {
+                        throw new common.errors.NotFoundError({ message: "User not found. Make Sure you are logged in on RC." });
+                    }
+                    return models.User.findOne({ rc_id: u._id }, localOptions)
+                        .then((model) => {
+                            return model;
+                        });
+                });
         }
     },
 

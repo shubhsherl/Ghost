@@ -7,10 +7,13 @@
  * Text = length 65535 (64 KiB)
  * Long text = length 1,000,000,000
  */
+//TODO change NULLABLE, UNIQUE, 
 module.exports = {
     posts: {
         id: {type: 'string', maxlength: 24, nullable: false, primary: true},
         uuid: {type: 'string', maxlength: 36, nullable: false, validations: {isUUID: true}},
+        room_id: {type: 'string', maxlength: 17, nullable: true, unique: false},
+        room_name: {type: 'string', maxlength: 980, nullable: true, unique: false},
         title: {type: 'string', maxlength: 2000, nullable: false, validations: {isLength: {max: 255}}},
         slug: {type: 'string', maxlength: 191, nullable: false, unique: true},
         mobiledoc: {type: 'text', maxlength: 1000000000, fieldtype: 'long', nullable: true},
@@ -61,6 +64,9 @@ module.exports = {
     },
     users: {
         id: {type: 'string', maxlength: 24, nullable: false, primary: true},
+        // rc_username can change but rc_id will never change
+        rc_id: {type: 'string', maxlength: 17, nullable: false, unique: true},
+        rc_username: {type: 'string', maxlength: 17, nullable: false, unique: true},
         name: {type: 'string', maxlength: 191, nullable: false},
         slug: {type: 'string', maxlength: 191, nullable: false, unique: true},
         ghost_auth_access_token: {type: 'string', maxlength: 32, nullable: true},
@@ -148,7 +154,7 @@ module.exports = {
             maxlength: 50,
             nullable: false,
             defaultTo: 'core',
-            validations: {isIn: [['core', 'blog', 'theme', 'app', 'plugin', 'private', 'members']]}
+            validations: {isIn: [['core', 'blog', 'theme', 'app', 'plugin', 'private', 'members', 'rc_settings']]}
         },
         created_at: {type: 'dateTime', nullable: false},
         created_by: {type: 'string', maxlength: 24, nullable: false},

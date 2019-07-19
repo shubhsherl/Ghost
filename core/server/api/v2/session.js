@@ -1,6 +1,7 @@
 const Promise = require('bluebird');
 const common = require('../../lib/common');
 const models = require('../../models');
+const rcUtils = require('../v2/utils/rc-utils');
 const auth = require('../../services/auth');
 
 const session = {
@@ -13,26 +14,39 @@ const session = {
          */
         return models.User.findOne({id: options.context.user});
     },
+    
     add(object) {
-        if (!object || !object.username || !object.password) {
+        if (!object || !object.rc_id || !object.rc_token) {
             return Promise.reject(new common.errors.UnauthorizedError({
                 message: common.i18n.t('errors.middleware.auth.accessDenied')
             }));
         }
 
-        return models.User.check({
-            email: object.username,
-            password: object.password
+        return models.User.findOne({
+            rc_id: object.rc_id
         }).then((user) => {
-            return Promise.resolve((req, res, next) => {
-                req.brute.reset(function (err) {
-                    if (err) {
-                        return next(err);
-                    }
-                    req.user = user;
-                    auth.session.createSession(req, res, next);
+            if (!user){
+                throw new common.errors.UnauthorizedError({
+                    message: common.i18n.t('errors.middleware.auth.accessDenied')
                 });
-            });
+            }
+            return rcUtils.getMe(object.rc_id, object.rc_token)
+                .then((u) => {
+                    if (!u.success) {
+                        throw new common.errors.UnauthorizedError({
+                            message: common.i18n.t('errors.middleware.auth.accessDenied')
+                        });
+                    }
+                    return Promise.resolve((req, res, next) => {
+                        req.brute.reset(function (err) {
+                            if (err) {
+                                return next(err);
+                            }
+                            req.user = user;
+                            auth.session.createSession(req, res, next);
+                        });
+                    });
+                });
         }).catch((err) => {
             throw new common.errors.UnauthorizedError({
                 message: common.i18n.t('errors.middleware.auth.accessDenied'),
@@ -40,6 +54,7 @@ const session = {
             });
         });
     },
+
     delete() {
         return Promise.resolve((req, res, next) => {
             auth.session.destroySession(req, res, next);

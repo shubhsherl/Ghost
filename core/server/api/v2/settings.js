@@ -44,6 +44,34 @@ module.exports = {
         }
     },
 
+    // TODO: find a better way to check if this setting
+    // Maybe add a setting in RC and keep both in sync.
+    inviteOnly: {
+        options: [],
+        validation: {
+            options: {
+                include: []
+            }
+        },
+        permissions: false,
+        query(frame) {
+            const key = 'invite_only';
+            let setting = settingsCache.get(key, {resolve: false});
+
+            if (!setting) {
+                return Promise.reject(new common.errors.NotFoundError({
+                    message: common.i18n.t('errors.api.settings.problemFindingSetting', {
+                        key: key
+                    })
+                }));
+            }
+
+            return {
+                [key]: setting
+            };
+        }
+    },
+
     read: {
         options: ['key'],
         validation: {

@@ -3,6 +3,7 @@ const session = require('express-session');
 const common = require('../../../lib/common');
 const constants = require('../../../lib/constants');
 const config = require('../../../config');
+const rcUtils = require('../../../api/v2/utils/rc-utils');
 const settingsCache = require('../../settings/cache');
 const models = require('../../../models');
 const SessionStore = require('./store');
@@ -37,9 +38,9 @@ const getSession = (req, res, next) => {
             saveUninitialized: false,
             name: 'ghost-admin-api-session',
             cookie: {
-                maxAge: constants.SIX_MONTH_MS,
-                httpOnly: true,
-                path: urlService.utils.getSubdir() + '/ghost',
+                maxAge: constants.THREE_MONTH_MS,
+                httpOnly: false,
+                path: urlService.utils.getSubdir() + '/',
                 sameSite: 'lax',
                 secure: urlService.utils.isSSL(config.get('url'))
             }
@@ -85,10 +86,11 @@ const cookieCsrfProtection = (req) => {
 
     const origin = getOrigin(req);
 
-    if (req.session.origin !== origin) {
+    // Check the origin allow Ghost and RC server_url
+    if (req.session.origin !== origin && settingsCache.get('server_url') !== origin) {
         throw new common.errors.BadRequestError({
             message: common.i18n.t('errors.middleware.auth.mismatchedOrigin', {
-                expected: req.session.origin,
+                expected: req.session.origin + ' OR ' + settingsCache.get('server_url'),
                 actual: origin
             })
         });
@@ -116,7 +118,27 @@ const authenticate = (req, res, next) => {
 
         if (!req.session || !req.session.user_id) {
             req.user = null;
-            return next();
+            return rcUtils.createSession(req)
+                .then((req) => {
+                    if(req.user) {
+                        getSession(req, res, function (err) {
+                            if (err) {
+                                return next(err);
+                            }
+                            const origin = getOrigin(req);
+                            if (!origin) {
+                                return next(new common.errors.BadRequestError({
+                                    message: common.i18n.t('errors.middleware.auth.unknownOrigin')
+                                }));
+                            }
+                            req.session.user_id = req.user.id;
+                            req.session.origin = origin;
+                            req.session.user_agent = req.get('user-agent');
+                            req.session.ip = req.ip;
+                        });
+                    }
+                    return next();
+                });
         }
 
         models.User.findOne({id: req.session.user_id})
