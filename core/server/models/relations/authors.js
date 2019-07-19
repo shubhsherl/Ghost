@@ -334,7 +334,7 @@ module.exports.extendModel = function extendModel(Post, Posts, ghostBookshelf) {
         permissible: function permissible(postModelOrId, action, context, unsafeAttrs, loadedPermissions, hasUserPermission, hasAppPermission, hasApiKeyPermission) {
             var self = this,
                 postModel = postModelOrId,
-                origArgs, isContributor, isAuthor, isEdit, isAdd, isDestroy;
+                origArgs, isContributor, isAuthor, isEdit, isAdd, isDestroy, isPage, isOwnerOrAdmin;
 
             // If we passed in an id instead of a model, get the model
             // then check the permissions
@@ -363,6 +363,8 @@ module.exports.extendModel = function extendModel(Post, Posts, ghostBookshelf) {
             isEdit = (action === 'edit');
             isAdd = (action === 'add');
             isDestroy = (action === 'destroy');
+            isPage = (context.is_page === true);
+            isOwnerOrAdmin = loadedPermissions.user && (_.some(loadedPermissions.user.roles, {name: 'Owner'}) || _.some(loadedPermissions.user.roles, {name: 'Administrator'}));
 
             function isChanging(attr) {
                 return unsafeAttrs[attr] && unsafeAttrs[attr] !== postModel.get(attr);
@@ -405,16 +407,17 @@ module.exports.extendModel = function extendModel(Post, Posts, ghostBookshelf) {
             function isCoAuthor() {
                 return postModel.related('authors').models.map(author => author.id).includes(context.user);
             }
-
-            if (isContributor && isEdit) {
+            if (isPage) {
+                hasUserPermission = isOwnerOrAdmin;
+            } else if (isContributor && isEdit) {
                 hasUserPermission = !isChanging('author_id') && !isChangingAuthors() && isCoAuthor();
             } else if (isContributor && isAdd) {
                 hasUserPermission = isOwner();
             } else if (isContributor && isDestroy) {
                 hasUserPermission = isPrimaryAuthor();
-            } else if (isAuthor && isEdit) {
+            } else if (isEdit) {
                 hasUserPermission = isCoAuthor() && !isChanging('author_id') && !isChangingAuthors();
-            } else if (isAuthor && isAdd) {
+            } else if (isAdd) {
                 hasUserPermission = isOwner();
             } else if (postModel) {
                 hasUserPermission = hasUserPermission || isPrimaryAuthor();
@@ -435,7 +438,7 @@ module.exports.extendModel = function extendModel(Post, Posts, ghostBookshelf) {
                     // @TODO: for now we simply re-use the new concept of `excludedAttrs`
                     // We only check the primary author of `authors`, any other change will be ignored.
                     // By this we can deprecate `author_id` more easily.
-                    if (isContributor || isAuthor) {
+                    if (isContributor && isEdit) {
                         return {
                             excludedAttrs: ['authors'].concat(excludedAttrs)
                         };

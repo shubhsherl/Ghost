@@ -1,5 +1,6 @@
 const models = require('../../models');
 const common = require('../../lib/common');
+const settingsCache = require('../../services/settings/cache');
 const allowedIncludes = ['tags', 'authors'];
 
 module.exports = {
@@ -65,7 +66,16 @@ module.exports = {
                             message: common.i18n.t('errors.api.posts.postNotFound')
                         });
                     }
-
+                    let rid = model.get('discussion_room_id');
+                    if (rid) {
+                        return models.Room.findOne({rid: rid}).then((d) => {
+                            if (d) {
+                                const url = `${settingsCache.get('server_url')}/${d.get('type')==='p'?'group':'channel'}/${d.get('name')}`;
+                                model.attributes.discussion_room = url;
+                            }
+                            return model;
+                        });
+                    }
                     return model;
                 });
         }

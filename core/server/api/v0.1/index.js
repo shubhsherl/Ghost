@@ -272,13 +272,16 @@ const http = (apiMethod) => {
                 }
             });
 
-        if(req.headers && req.headers.cookie)
-            forEach(req.headers.cookie.split(';'), (v)=>{
-                if(v.includes('rc_uid'))
+        if (req.headers && req.headers.cookie) {
+            forEach(req.headers.cookie.split(';'), (v) => {
+                if (v.includes('rc_uid')) {
                     options.rc_uid = v.split('=')[1];
-                if(v.includes('rc_token'))
+                }
+                if (v.includes('rc_token')) {
                     options.rc_token = v.split('=')[1];
+                }
             });
+        }
 
         if (req.files) {
             options.files = req.files;

@@ -43,12 +43,12 @@ module.exports = {
         return shared.pipeline(require('./posts'), localUtils);
     },
 
-    get invites() {
-        return shared.pipeline(require('./invites'), localUtils);
-    },
-
     get rcapi() {
         return shared.pipeline(require('./rcapi'), localUtils);
+    },
+
+    get rhooks() {
+        return shared.pipeline(require('./rhooks'), localUtils);
     },
 
     get mail() {

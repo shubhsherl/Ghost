@@ -7,7 +7,8 @@ module.exports = {
     browse: {
         options: [
             'include',
-            'name',
+            'uname',
+            'rname',
             'page',
             'limit',
             'fields',
@@ -17,17 +18,65 @@ module.exports = {
         ],
         validation: {
             options: {
+                include: ALLOWED_INCLUDES
+            }
+        },
+        permissions: false,
+        query(frame) {
+            let username = frame.options.uname;
+            let roomname = frame.options.rname;
+            if (username) {
+                return rcUtils.validateUser(frame.original.rc_uid, frame.original.rc_token, username)
+                    .then((user) => {
+                        return user;
+                    });
+            }
+            return rcUtils.validateRoom(frame.original.rc_uid, frame.original.rc_token, roomname)
+                .then((room) => {
+                    return room;
+                });
+        }
+    },
+
+    discussion: {
+        options: [],
+        data: ['room'],
+        validation: {
+            options: {
+                include: ALLOWED_INCLUDES
+            }
+        },
+
+        permissions: false,
+        query(frame) {
+            const username = frame.user.get('rc_username');
+            const { title, type } = frame.data.room[0];
+            return rcUtils.createDiscussion(frame.original.rc_uid, frame.original.rc_token, title, username, type)
+                .then((room) => {
+                    return room;
+
+                });
+        }
+    },
+
+    collaborate: {
+        options: [],
+        data: [
+            'collaboration'
+        ],
+        validation: {
+            options: {
                 include: ALLOWED_INCLUDES,
             }
         },
         permissions: false,
         query(frame) {
-            let username = frame.options.name;
+            const {rc_id, post_id, post} = frame.data.collaboration[0]
 
-            return rcUtils.validateUser(frame.original.rc_uid, frame.original.rc_token, username)
-                .then((user) =>{
-                    return user;
-                })
+            return rcUtils.collaborate(frame.original.rc_uid, frame.original.rc_token, rc_id, post_id, post)
+                .then((res) => {
+                    return res;
+                });
         }
     }
 };

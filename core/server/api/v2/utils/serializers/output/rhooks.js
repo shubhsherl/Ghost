@@ -7,9 +7,8 @@ module.exports = {
         if (!models) {
             return;
         }
-
         frame.response = {
-            data : [models]
+            success: true
         };
 
         debug(frame.response);

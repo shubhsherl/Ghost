@@ -70,7 +70,25 @@ module.exports = {
                             message: common.i18n.t('errors.api.posts.postNotFound')
                         });
                     }
-
+                    let rid = model.get('room_id');
+                    if (rid) {
+                        return models.Room.findOne({rid: rid}).then((r) => {
+                            if (r) {
+                                model.attributes.room_name = r.get('name');
+                            }
+                            rid = model.get('discussion_room_id');
+                            if (rid) {
+                                return models.Room.findOne({rid: rid}).then((d) => {
+                                    if (d) {
+                                        model.attributes.discussion_room_name = d.get('name');
+                                        model.attributes.discussion_room_type = d.get('type');
+                                    }
+                                    return model;
+                                });
+                            }
+                            return model;
+                        });
+                    }
                     return model;
                 });
         }
