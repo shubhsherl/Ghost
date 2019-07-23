@@ -518,7 +518,6 @@ authentication = {
             const data = invitation.user[0];
             return rcUtils.getUser(rcUid, rcToken, data.rc_username)
                 .then((user) => {
-                    console.log(user.user);
                     if (user.success && user.user) {
                         const u = user.user;
                         if (!u.emails){

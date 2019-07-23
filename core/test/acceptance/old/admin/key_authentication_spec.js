@@ -36,35 +36,6 @@ describe('Admin API key authentication', function () {
             .expect(401);
     });
 
-    it('Can access browse endpoint with correct token', function () {
-        return request.get(localUtils.API.getApiQuery('posts/'))
-            .set('Authorization', `Ghost ${localUtils.getValidAdminToken('/v2/admin/')}`)
-            .expect('Content-Type', /json/)
-            .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(200);
-    });
-
-    it('Can create post', function () {
-        const post = {
-            title: 'Post created with api_key'
-        };
-
-        return request
-            .post(localUtils.API.getApiQuery('posts/?include=authors'))
-            .set('Origin', config.get('url'))
-            .set('Authorization', `Ghost ${localUtils.getValidAdminToken('/v2/admin/')}`)
-            .send({
-                posts: [post]
-            })
-            .expect('Content-Type', /json/)
-            .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(201)
-            .then((res) => {
-                // falls back to owner user
-                res.body.posts[0].authors.length.should.eql(1);
-            });
-    });
-
     it('Can read users', function () {
         return request
             .get(localUtils.API.getApiQuery('users/'))

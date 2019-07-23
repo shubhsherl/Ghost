@@ -140,7 +140,7 @@ const authenticate = (req, res, next) => {
                     return next();
                 });
         }
-
+        
         models.User.findOne({id: req.session.user_id})
             .then((user) => {
                 req.user = user;

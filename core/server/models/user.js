@@ -288,6 +288,14 @@ User = ghostBookshelf.Model.extend({
         });
     },
 
+    isParent: function isParent(id) {
+        var parents = this.related('parents');
+
+        return parents.some(function getParent(parent) {
+            return parent.get('parent_id') === id;
+        });
+    },
+
     updateLastSeen: function updateLastSeen() {
         this.set({last_seen: new Date()});
         return this.save();
@@ -749,7 +757,7 @@ User = ghostBookshelf.Model.extend({
                 hasUserPermission = loadedPermissions.user && _.some(loadedPermissions.user.roles, {name: 'Owner'});
             } else if (loadedPermissions.user && _.some(loadedPermissions.user.roles, {name: 'Editor'})) {
                 // If the user we are trying to edit is an Author or Contributor, allow it
-                hasUserPermission = userModel.hasRole('Contributor') && userModel.get('created_by') === context.user;
+                hasUserPermission = userModel.hasRole('Contributor') && userModel.isParent(context.user);
             }
         }
 
@@ -763,8 +771,8 @@ User = ghostBookshelf.Model.extend({
 
             // Users with the role 'Editor' have complex permissions when the action === 'destroy'
             if (loadedPermissions.user && _.some(loadedPermissions.user.roles, {name: 'Editor'})) {
-                // Alternatively, if the user we are trying to edit is an Author, allow it
-                hasUserPermission = context.user === userModel.get('id') || (userModel.hasRole('Contributor') && userModel.get('created_by') === context.user);
+                // Alternatively, if the user we are trying to edit is his/her contributor, allow it
+                hasUserPermission = context.user === userModel.get('id') || (userModel.hasRole('Contributor') && userModel.isParent(context.user));
             }
         }
 

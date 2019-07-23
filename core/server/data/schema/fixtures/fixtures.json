@@ -652,7 +652,6 @@
                 "Admin Integration": {
                     "mail": "all",
                     "notification": "all",
-                    "post": "all",
                     "setting": "all",
                     "slug": "all",
                     "tag": "all",

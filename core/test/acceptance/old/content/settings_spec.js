@@ -55,7 +55,7 @@ describe('Settings Content API', function () {
                      *
                      * This is just a hack to be able to alias ghost_head & ghost_foot quickly.
                      */
-                    if (['codeinjection_head', 'codeinjection_foot'].includes(key)) {
+                    if (['codeinjection_head', 'codeinjection_foot', 'ghost_foot'].includes(key)) {
                         return;
                     }
 

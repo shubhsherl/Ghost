@@ -1,8 +1,12 @@
 const should = require('should');
 const sinon = require('sinon');
 
+const rcUtils = require('../../../utils/rc-utils');
+
 const models = require('../../../../server/models');
 const {UnauthorizedError} = require('../../../../server/lib/common/errors');
+const settingsCache = require('../../../../server/services/settings/cache');
+
 
 const sessionController = require('../../../../server/api/v2/session');
 const sessionServiceMiddleware = require('../../../../server/services/auth/session/middleware');
@@ -35,10 +39,10 @@ describe('Session controller', function () {
         it('it checks the username and password and throws UnauthorizedError if it fails', function () {
             const userCheckStub = sinon.stub(models.User, 'check')
                 .rejects(new Error());
-
+                        
             return sessionController.add({
-                username: 'freddy@vodafone.com',
-                password: 'qu33nRul35'
+                rc_id: 'W32TtQw23fdsaty22',
+                rc_token: 'njakb3ebibshdu9p283bjab_neiuwwh'
             }, {}).then(() => {
                 should.fail('session.add did not throw');
             },(err) => {
@@ -47,6 +51,7 @@ describe('Session controller', function () {
         });
 
         it('it returns a function that calls req.brute.reset, sets req.user and calls createSession if the check works', function () {
+            const fakeId = 'W32TtQw23fdsaty22';
             const fakeReq = {
                 brute: {
                     reset: sinon.stub().callsArg(0)
@@ -55,14 +60,17 @@ describe('Session controller', function () {
             const fakeRes = {};
             const fakeNext = () => {};
             const fakeUser = models.User.forge({});
-            sinon.stub(models.User, 'check')
+            sinon.stub(models.User, 'findOne')
                 .resolves(fakeUser);
+            sinon.stub(settingsCache, 'get')
+                .withArgs('server_url')
+                .returns(rcUtils.serverUrl());
 
             const createSessionStub = sinon.stub(sessionServiceMiddleware, 'createSession');
-
+            rcUtils.buildMe();
             return sessionController.add({
-                username: 'freddy@vodafone.com',
-                password: 'qu33nRul35'
+                rc_id: fakeId,
+                rc_token: rcUtils.getTokenById({id: fakeId})
             }, {}).then((fn) => {
                 fn(fakeReq, fakeRes, fakeNext);
             }).then(function () {
@@ -77,6 +85,7 @@ describe('Session controller', function () {
         });
 
         it('it returns a function that calls req.brute.reset and calls next if reset errors', function () {
+            const fakeId = 'W32TtQw23fdsaty22';
             const resetError = new Error();
             const fakeReq = {
                 brute: {
@@ -86,14 +95,17 @@ describe('Session controller', function () {
             const fakeRes = {};
             const fakeNext = sinon.stub();
             const fakeUser = models.User.forge({});
-            sinon.stub(models.User, 'check')
+            sinon.stub(models.User, 'findOne')
                 .resolves(fakeUser);
+            sinon.stub(settingsCache, 'get')
+                .withArgs('server_url')
+                .returns(rcUtils.serverUrl());
 
             const createSessionStub = sinon.stub(sessionServiceMiddleware, 'createSession');
-
+            rcUtils.buildMe();
             return sessionController.add({
-                username: 'freddy@vodafone.com',
-                password: 'qu33nRul35'
+                rc_id: fakeId,
+                rc_token: rcUtils.getTokenById({id: fakeId})
             }, {}).then((fn) => {
                 fn(fakeReq, fakeRes, fakeNext);
             }).then(function () {

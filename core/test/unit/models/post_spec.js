@@ -720,7 +720,7 @@ describe('Unit: models/post: uses database (@TODO: fix me)', function () {
                         true
                     ).then((result) => {
                         should.exist(result);
-                        should(result.excludedAttrs).deepEqual(['authors', 'tags']);
+                        should(result.excludedAttrs).deepEqual(['tags']);
                         should(mockPostObj.get.called).be.false();
                         done();
                     }).catch(done);
@@ -744,7 +744,7 @@ describe('Unit: models/post: uses database (@TODO: fix me)', function () {
                         true
                     ).then((result) => {
                         should.exist(result);
-                        should(result.excludedAttrs).deepEqual(['authors', 'tags']);
+                        should(result.excludedAttrs).deepEqual(['tags']);
                         should(mockPostObj.get.called).be.false();
                     });
                 });
@@ -829,7 +829,7 @@ describe('Unit: models/post: uses database (@TODO: fix me)', function () {
                         true
                     ).then((result) => {
                         should.exist(result);
-                        should(result.excludedAttrs).deepEqual(['authors', 'tags']);
+                        should(result.excludedAttrs).deepEqual(['tags']);
                         should(mockPostObj.get.calledOnce).be.true();
                         should(mockPostObj.related.calledOnce).be.true();
                     });
@@ -1154,12 +1154,14 @@ describe('Unit: models/post: uses database (@TODO: fix me)', function () {
 
             it('resolves if hasUserPermission is true', function () {
                 var mockPostObj = {
-                        get: sinon.stub()
+                        get: sinon.stub(),
+                        related: sinon.stub()
                     },
                     context = {user: 1},
                     unsafeAttrs = {author_id: 2};
 
                 mockPostObj.get.withArgs('author_id').returns(2);
+                mockPostObj.related.withArgs('authors').returns({models: [{id: 1}, {id: 2}]});
 
                 return models.Post.permissible(
                     mockPostObj,
@@ -1171,7 +1173,7 @@ describe('Unit: models/post: uses database (@TODO: fix me)', function () {
                     true,
                     true
                 ).then(() => {
-                    should(mockPostObj.get.called).be.false();
+                    should(mockPostObj.get.called).be.true();
                 });
             });
         });

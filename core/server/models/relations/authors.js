@@ -401,12 +401,13 @@ module.exports.extendModel = function extendModel(Post, Posts, ghostBookshelf) {
             }
 
             function isPrimaryAuthor() {
-                return (context.user === postModel.related('authors').models[0].id);
+                return postModel && (context.user === postModel.related('authors').models[0].id);
             }
 
             function isCoAuthor() {
-                return postModel.related('authors').models.map(author => author.id).includes(context.user);
+                return postModel && postModel.related('authors').models.map(author => author.id).includes(context.user);
             }
+
             if (isPage) {
                 hasUserPermission = isOwnerOrAdmin;
             } else if (isContributor && isEdit) {

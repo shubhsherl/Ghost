@@ -33,7 +33,7 @@ const nonePublicAuth = (apiConfig, frame) => {
         unsafeAttrObject = apiConfig.unsafeAttrs ? _.pick(frame.data.pages[0], apiConfig.unsafeAttrs) : {};
         frame.options.context.is_page = true;
     }
-
+    
     const permsPromise = permissions.canThis(frame.options.context)[apiConfig.method][singular](permissionIdentifier, unsafeAttrObject);
 
     return permsPromise.then((result) => {

@@ -2,6 +2,7 @@ var _ = require('lodash'),
     uuid = require('uuid'),
     ObjectId = require('bson-objectid'),
     moment = require('moment'),
+    crypto = require('crypto'),
     constants = require('../../../server/lib/constants'),
     DataGenerator = {};
 
@@ -128,6 +129,8 @@ DataGenerator.Content = {
         {
             // owner (owner is still id 1 because of permissions)
             id: '1',
+            rc_id: 'Jjwjg6gouWLXhMGKW',
+            rc_username: 'owner',
             name: 'Joe Bloggs',
             slug: 'joe-bloggs',
             email: 'jbloggs@example.com',
@@ -137,6 +140,8 @@ DataGenerator.Content = {
         {
             // admin
             id: ObjectId.generate(),
+            rc_id: 'AZG7dyTXMJoPhJHE5',
+            rc_username: 'smith.j',
             name: 'Smith Wellingsworth',
             slug: 'smith-wellingsworth',
             email: 'swellingsworth@example.com',
@@ -145,6 +150,8 @@ DataGenerator.Content = {
         {
             // editor
             id: ObjectId.generate(),
+            rc_id: 'hHXTP7ZFLz6Fmqwck',
+            rc_username: 'jim.b',
             name: 'Jimothy Bogendath',
             slug: 'jimothy-bogendath',
             email: 'jbOgendAth@example.com',
@@ -153,6 +160,8 @@ DataGenerator.Content = {
         {
             // author
             id: ObjectId.generate(),
+            rc_id: 'PHFHeGZSLJYSDCBYk',
+            rc_username: 'slimer.m',
             name: 'Slimer McEctoplasm',
             slug: 'slimer-mcectoplasm',
             email: 'smcectoplasm@example.com',
@@ -161,6 +170,8 @@ DataGenerator.Content = {
         {
             // editor 2
             id: ObjectId.generate(),
+            rc_id: 'DFhakjbd38jsdbERf',
+            rc_username: 'ivan.e',
             name: 'Ivan Email',
             slug: 'ivan-email',
             email: 'info1@ghost.org',
@@ -169,6 +180,8 @@ DataGenerator.Content = {
         {
             // author 2
             id: ObjectId.generate(),
+            rc_id: 'DjBasdakUB323njdc',
+            rc_username: 'author.2',
             name: 'Author2',
             slug: 'a-2',
             email: 'info2@ghost.org',
@@ -177,6 +190,8 @@ DataGenerator.Content = {
         {
             // admin 2
             id: ObjectId.generate(),
+            rc_id: 'jkGhnjsUUnjs12dsD',
+            rc_username: 'admin.2',
             name: 'admin2',
             slug: 'ad-2',
             email: 'info3@ghost.org',
@@ -185,6 +200,8 @@ DataGenerator.Content = {
         {
             // contributor
             id: ObjectId.generate(),
+            rc_id: 'DsklsDnjS32knlkds',
+            rc_username: 'contrib',
             name: 'Contributor',
             slug: 'contributor',
             email: 'contributor@ghost.org',
@@ -193,6 +210,8 @@ DataGenerator.Content = {
         {
             // contributor
             id: ObjectId.generate(),
+            rc_id: 'HjUnjsd23knssd3We',
+            rc_username: 'conrtib.2',
             name: 'contributor2',
             slug: 'contrib-2',
             email: 'contributor2@ghost.org',
@@ -293,6 +312,15 @@ DataGenerator.Content = {
             id: ObjectId.generate(),
             name: 'Admin Integration',
             description: 'External Apps'
+        }
+    ],
+
+    rooms: [
+        {
+            id: ObjectId.generate(),
+            name: 'general',
+            type: 'c',
+            rid: 'GENERAL'
         }
     ],
 
@@ -502,6 +530,14 @@ DataGenerator.forKnex = (function () {
         if (!newObj.email) {
             newObj.email = `test${newObj.slug}@ghost.org`;
         }
+        
+        if (!newObj.rc_id) {
+            newObj.rc_id = crypto.randomBytes(8).toString('hex').substring(1,17);
+        }
+
+        if (!newObj.rc_username) {
+            newObj.rc_username = newObj.slug;
+        }
 
         return _.defaults(newObj, {
             id: ObjectId.generate(),
@@ -518,6 +554,17 @@ DataGenerator.forKnex = (function () {
             updated_by: DataGenerator.Content.users[0].id,
             visibility: 'public',
             location: 'location'
+        });
+    }
+
+    function createRoom(overrides) {
+        var newObj = _.cloneDeep(overrides || {});
+
+        return _.defaults(newObj, {
+            id: ObjectId.generate(),
+            rid: 'GENERAL',
+            name: 'general',
+            type: 'c'
         });
     }
 
@@ -724,6 +771,10 @@ DataGenerator.forKnex = (function () {
         createUser(DataGenerator.Content.users[7])
     ];
 
+    const rooms = [
+        createRoom(DataGenerator.Content.rooms[0])
+    ];
+
     const clients = [
         createClient({name: 'Ghost Admin', slug: 'ghost-admin', type: 'ua'}),
         createClient({name: 'Ghost Scheduler', slug: 'ghost-scheduler', type: 'web'}),
@@ -899,6 +950,7 @@ DataGenerator.forKnex = (function () {
         createGenericPost: createGenericPost,
         createTag: createTag,
         createUser: createUser,
+        createRoom: createRoom,
         createUsersRoles: createUsersRoles,
         createPostsAuthors: createPostsAuthors,
         createClient: createClient,
@@ -927,6 +979,7 @@ DataGenerator.forKnex = (function () {
         app_fields: app_fields,
         roles: roles,
         users: users,
+        rooms: rooms,
         roles_users: roles_users,
         clients: clients,
         webhooks: webhooks,

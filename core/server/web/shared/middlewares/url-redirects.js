@@ -106,7 +106,7 @@ _private.redirect = (req, res, next, redirectFn) => {
         debug(`url redirect to: ${redirectUrl}`);
         return urlService.utils.redirect301(res, redirectUrl);
     }
-
+    
     debug('no url redirect');
     next();
 };

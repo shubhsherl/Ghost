@@ -64,7 +64,7 @@ function parseBody(body, type) {
     if (body) {
         result = JSON.parse(body);
     }
-
+    
     if (!result || !result.success) {
         return failResult;
     }

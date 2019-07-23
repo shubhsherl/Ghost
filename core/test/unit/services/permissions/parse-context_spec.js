@@ -10,6 +10,7 @@ describe('Permissions', function () {
                 user: null,
                 api_key: null,
                 app: null,
+                is_page: false,
                 public: true,
                 integration: null
             });
@@ -19,6 +20,7 @@ describe('Permissions', function () {
                 user: null,
                 api_key: null,
                 app: null,
+                is_page: false,
                 public: true,
                 integration: null
             });
@@ -31,6 +33,7 @@ describe('Permissions', function () {
                 user: null,
                 api_key: null,
                 app: null,
+                is_page: false,
                 public: true,
                 integration: null
             });
@@ -40,6 +43,7 @@ describe('Permissions', function () {
                 user: null,
                 api_key: null,
                 app: null,
+                is_page: false,
                 public: true,
                 integration: null
             });
@@ -52,6 +56,7 @@ describe('Permissions', function () {
                 user: 1,
                 api_key: null,
                 app: null,
+                is_page: false,
                 public: false,
                 integration: null
             });
@@ -70,6 +75,7 @@ describe('Permissions', function () {
                     type: 'content'
                 },
                 app: null,
+                is_page: false,
                 public: true,
                 integration: {id: 2}
             });
@@ -88,6 +94,7 @@ describe('Permissions', function () {
                     type: 'admin'
                 },
                 app: null,
+                is_page: false,
                 public: false,
                 integration: {id: 3}
             });
@@ -100,6 +107,7 @@ describe('Permissions', function () {
                 user: null,
                 api_key: null,
                 app: 5,
+                is_page: false,
                 public: false,
                 integration: null
             });
@@ -112,6 +120,7 @@ describe('Permissions', function () {
                 user: null,
                 api_key: null,
                 app: null,
+                is_page: false,
                 public: false,
                 integration: null
             });
@@ -122,6 +131,7 @@ describe('Permissions', function () {
                 user: null,
                 api_key: null,
                 app: null,
+                is_page: false,
                 public: false,
                 integration: null
             });
@@ -134,6 +144,7 @@ describe('Permissions', function () {
                 user: null,
                 api_key: null,
                 app: null,
+                is_page: false,
                 public: false,
                 integration: null
             });
@@ -144,6 +155,19 @@ describe('Permissions', function () {
                 user: null,
                 api_key: null,
                 app: null,
+                is_page: false,
+                public: false,
+                integration: null
+            });
+        });
+        it('should return is_page if is_page provided', function () {
+            parseContext({is_page: true}).should.eql({
+                internal: false,
+                external: false,
+                user: null,
+                api_key: null,
+                app: null,
+                is_page: true,
                 public: false,
                 integration: null
             });

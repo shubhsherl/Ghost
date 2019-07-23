@@ -225,96 +225,11 @@ describe('Auth Strategies', function () {
     });
 
     describe('Ghost Strategy', function () {
-        var inviteFindOneStub, userAddStub, userEditStub, userFindOneStub;
+        var userEditStub, userFindOneStub;
 
         beforeEach(function () {
             userFindOneStub = sinon.stub(Models.User, 'findOne');
-            userAddStub = sinon.stub(Models.User, 'add');
             userEditStub = sinon.stub(Models.User, 'edit');
-            inviteFindOneStub = sinon.stub(Models.Invite, 'findOne');
-        });
-
-        it('with invite, but with wrong invite token', function (done) {
-            var ghostAuthAccessToken = '12345',
-                req = {body: {inviteToken: 'wrong'}},
-                profile = {email: 'test@example.com', id: '1234'};
-
-            userFindOneStub.returns(Promise.resolve(null));
-            inviteFindOneStub.returns(Promise.reject(new common.errors.NotFoundError()));
-
-            authStrategies.ghostStrategy(req, ghostAuthAccessToken, null, profile, function (err) {
-                should.exist(err);
-                (err instanceof common.errors.NotFoundError).should.eql(true);
-                userFindOneStub.calledOnce.should.be.false();
-                inviteFindOneStub.calledOnce.should.be.true();
-                done();
-            });
-        });
-
-        it('with correct invite token, but expired', function (done) {
-            var ghostAuthAccessToken = '12345',
-                req = {body: {inviteToken: 'token'}},
-                profile = {email: 'test@example.com', id: '1234'};
-
-            userFindOneStub.returns(Promise.resolve(null));
-            inviteFindOneStub.returns(Promise.resolve(Models.Invite.forge({
-                id: 1,
-                token: 'token',
-                expires: Date.now() - 1000
-            })));
-
-            authStrategies.ghostStrategy(req, ghostAuthAccessToken, null, profile, function (err) {
-                should.exist(err);
-                (err instanceof common.errors.NotFoundError).should.eql(true);
-                userFindOneStub.calledOnce.should.be.false();
-                inviteFindOneStub.calledOnce.should.be.true();
-                done();
-            });
-        });
-
-        it('with correct invite token', function (done) {
-            var ghostAuthAccessToken = '12345',
-                req = {body: {inviteToken: 'token'}},
-                invitedProfile = {email: 'test@example.com', name: 'Wolfram Alpha', id: '1234'},
-                invitedUser = {id: 2},
-                inviteModel = Models.Invite.forge({
-                    id: 1,
-                    token: 'token',
-                    expires: Date.now() + 2000,
-                    role_id: '2'
-                });
-
-            sinon.stub(security.identifier, 'uid').returns('12345678');
-
-            userFindOneStub.returns(Promise.resolve(null));
-
-            userAddStub.withArgs({
-                email: invitedProfile.email,
-                name: invitedProfile.name,
-                password: '12345678',
-                roles: [inviteModel.get('role_id')],
-                ghost_auth_id: invitedProfile.id,
-                ghost_auth_access_token: ghostAuthAccessToken
-            }, {
-                context: {internal: true}
-            }).returns(Promise.resolve(invitedUser));
-
-            userEditStub.returns(Promise.resolve(invitedUser));
-            inviteFindOneStub.returns(Promise.resolve(inviteModel));
-            sinon.stub(inviteModel, 'destroy').returns(Promise.resolve());
-
-            authStrategies.ghostStrategy(req, ghostAuthAccessToken, null, invitedProfile, function (err, user, profile) {
-                should.not.exist(err);
-                should.exist(user);
-                should.exist(profile);
-                user.should.eql(invitedUser);
-                profile.should.eql(invitedProfile);
-
-                userAddStub.calledOnce.should.be.true();
-                userFindOneStub.calledOnce.should.be.false();
-                inviteFindOneStub.calledOnce.should.be.true();
-                done();
-            });
         });
 
         it('setup', function (done) {
@@ -344,7 +259,6 @@ describe('Auth Strategies', function () {
             authStrategies.ghostStrategy(req, ghostAuthAccessToken, null, ownerProfile, function (err, user, profile) {
                 should.not.exist(err);
                 userFindOneStub.calledTwice.should.be.true();
-                inviteFindOneStub.calledOnce.should.be.false();
                 userEditStub.calledOnce.should.be.true();
 
                 should.exist(user);
@@ -380,7 +294,6 @@ describe('Auth Strategies', function () {
                 should.not.exist(err);
                 userFindOneStub.calledOnce.should.be.true();
                 userEditStub.calledOnce.should.be.true();
-                inviteFindOneStub.calledOnce.should.be.false();
 
                 should.exist(user);
                 should.exist(profile);
@@ -416,7 +329,6 @@ describe('Auth Strategies', function () {
 
                 userFindOneStub.calledOnce.should.be.true();
                 userEditStub.calledOnce.should.be.false();
-                inviteFindOneStub.calledOnce.should.be.false();
 
                 should.not.exist(user);
                 should.not.exist(profile);

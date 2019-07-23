@@ -47,6 +47,7 @@ module.exports = function parseContext(context) {
 
     if (context && context.is_page) {
         parsed.is_page = true;
+        parsed.public = false;
     }
 
     return parsed;

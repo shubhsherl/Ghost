@@ -69,7 +69,7 @@ const http = (apiImpl) => {
             options: apiImpl.options,
             data: apiImpl.data
         });
-
+        
         apiImpl(frame)
             .then((result) => {
                 return shared.headers.get(result, apiImpl.headers, frame)

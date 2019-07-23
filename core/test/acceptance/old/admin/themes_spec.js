@@ -45,16 +45,16 @@ describe('Themes API', function () {
                 should.exist(jsonResponse.themes);
                 localUtils.API.checkResponse(jsonResponse, 'themes');
                 jsonResponse.themes.length.should.eql(5);
-
+                
                 localUtils.API.checkResponse(jsonResponse.themes[0], 'theme');
                 jsonResponse.themes[0].name.should.eql('broken-theme');
                 jsonResponse.themes[0].package.should.be.an.Object().with.properties('name', 'version');
                 jsonResponse.themes[0].active.should.be.false();
 
-                localUtils.API.checkResponse(jsonResponse.themes[1], 'theme', 'templates');
+                localUtils.API.checkResponse(jsonResponse.themes[1], 'theme');
                 jsonResponse.themes[1].name.should.eql('casper');
                 jsonResponse.themes[1].package.should.be.an.Object().with.properties('name', 'version');
-                jsonResponse.themes[1].active.should.be.true();
+                jsonResponse.themes[1].active.should.be.false();
 
                 localUtils.API.checkResponse(jsonResponse.themes[2], 'theme');
                 jsonResponse.themes[2].name.should.eql('casper-1.4');
@@ -148,8 +148,8 @@ describe('Themes API', function () {
                 // Casper should be present and still active
                 const casperTheme = _.find(jsonResponse.themes, {name: 'casper'});
                 should.exist(casperTheme);
-                localUtils.API.checkResponse(casperTheme, 'theme', 'templates');
-                casperTheme.active.should.be.true();
+                localUtils.API.checkResponse(casperTheme, 'theme');
+                casperTheme.active.should.be.false();
 
                 // The added theme should be here
                 const addedTheme = _.find(jsonResponse.themes, {name: 'valid'});
@@ -206,8 +206,8 @@ describe('Themes API', function () {
                 // Casper should be present and still active
                 const casperTheme = _.find(jsonResponse.themes, {name: 'casper'});
                 should.exist(casperTheme);
-                localUtils.API.checkResponse(casperTheme, 'theme', 'templates');
-                casperTheme.active.should.be.true();
+                localUtils.API.checkResponse(casperTheme, 'theme');
+                casperTheme.active.should.be.false();
 
                 // The deleted theme should not be here
                 const deletedTheme = _.find(jsonResponse.themes, {name: 'valid'});
@@ -250,8 +250,8 @@ describe('Themes API', function () {
 
                 const casperTheme = _.find(jsonResponse.themes, {name: 'casper'});
                 should.exist(casperTheme);
-                localUtils.API.checkResponse(casperTheme, 'theme', 'templates');
-                casperTheme.active.should.be.true();
+                localUtils.API.checkResponse(casperTheme, 'theme');
+                casperTheme.active.should.be.false();
 
                 const testTheme = _.find(jsonResponse.themes, {name: 'test-theme'});
                 should.exist(testTheme);

@@ -19,7 +19,7 @@ describe('Mail API', function () {
                 request = supertest.agent(config.get('url'));
             })
             .then(function () {
-                return localUtils.doAuth(request, 'invites');
+                return localUtils.doAuth(request);
             });
     });
 
