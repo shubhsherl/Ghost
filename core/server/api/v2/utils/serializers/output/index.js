@@ -43,6 +43,10 @@ module.exports = {
         return require('./rcapi');
     },
 
+    get rhooks() {
+        return require('./rhooks');
+    },
+
     get settings() {
         return require('./settings');
     },
