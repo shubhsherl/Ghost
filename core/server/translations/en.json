@@ -253,6 +253,12 @@
                     "context": "Error thrown from user update during login",
                     "help": "Visit and save your profile after logging in to check for problems."
                 },
+                "rc": {
+                    "userNotFound": "User not found. Make Sure you are logged in on RC.",
+                    "noEmail": "Cannot create account without email.",
+                    "notAdmin": "Callee is not an admin, cannot Setup Ghost.",
+                    "unableToFetch": "Unable to fetch the details."
+                },
                 "incorrectPassword": "Your password is incorrect.",
                 "accountLocked": "Your account is locked. Please reset your password to log in again by clicking the \"Forgotten password?\" link!",
                 "accountSuspended": "Your account was suspended.",

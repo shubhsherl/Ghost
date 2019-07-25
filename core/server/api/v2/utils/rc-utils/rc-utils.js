@@ -107,12 +107,12 @@ module.exports = {
                     if (user.roles.indexOf('admin') === -1) {
                         //callee is not admin on RC
                         return Promise.reject(new common.errors.GhostError({
-                            message: 'Callee is not an admin, cannot Setup Ghost'
+                            message: common.i18n.t('errors.models.user.rc.notAdmin')
                         }));
                     }
                 } else {
                     return Promise.reject(new common.errors.GhostError({
-                        message: 'Unable to fetch the details'
+                        message: common.i18n.t('errors.models.user.rc.unableToFetch')
                     }));
                 }
                 resolve(user);

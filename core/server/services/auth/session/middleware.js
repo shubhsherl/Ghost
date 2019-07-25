@@ -28,6 +28,15 @@ const getOrigin = (req) => {
     return null;
 };
 
+// Since we need cross-cookie, store the token under domain(not subdomain)
+const getDomain = () => {
+    let domain = settingsCache.get('server_url').replace(/.*\/\//, '');
+    domain = domain.replace(/:.*$/, '');
+    domain = domain.replace(/\/$/, '');
+    domain = `.${ domain }`;
+    return domain;
+}
+
 let UNO_SESSIONIONA;
 const getSession = (req, res, next) => {
     if (!UNO_SESSIONIONA) {
@@ -40,6 +49,7 @@ const getSession = (req, res, next) => {
             cookie: {
                 maxAge: constants.THREE_MONTH_MS,
                 httpOnly: false,
+                domain: getDomain(),
                 path: urlService.utils.getSubdir() + '/',
                 sameSite: 'lax',
                 secure: urlService.utils.isSSL(config.get('url'))

@@ -37,7 +37,7 @@ module.exports = (post) => {
         });
 
     const image = post.rc_image ? post.rc_image : (post.feature_image ? post.feature_image : settingsCache.get('cover_image'));
-    const shortDescription = post.html ? getExcerpt(post.html, {words: 500}) : 'No Description';
+    const shortDescription = post.html ? getExcerpt(post.html) : 'No Description';
     
     return {
         alias: settingsCache.get('title'),

@@ -8,6 +8,7 @@ const Promise = require('bluebird'),
     constants = require('../../lib/constants'),
     pipeline = require('../../lib/promise/pipeline'),
     mail = require('../../services/mail'),
+    settingsCache = require('../../services/settings/cache'),
     urlService = require('../../services/url'),
     localUtils = require('./utils'),
     rcUtils = require('../v2/utils/rc-utils'),
@@ -42,6 +43,18 @@ function getVerifiedEmail(emails) {
             email = e.address;
     });
     return email;
+}
+
+/**
+ * Returns avatarUrl
+ *
+ * @return {String}
+ */
+function getAvatar(username, url) {
+    if (!url) {
+        url = settingsCache.get('server_url');
+    }
+    return `${url.replace(/\/$/, '')}/avatar/${username}`;
 }
 
 /**
@@ -83,13 +96,20 @@ function setupTasks(setupData) {
         const rcUrl = setupData.setup[0].rc_url;
         const announceToken = setupData.setup[0].announce_token;
         const settingsToken = setupData.setup[0].settings_token;
+        
+        if (!rcUrl || !announceToken || !settingsToken) {
+            throw new common.errors.GhostError({
+                message: common.i18n.t('errors.api.authentication.setupUnableToRun')
+            });
+        }
+        
         return rcUtils.checkAdmin(rcUrl, id, token).then((data) => {
             return {
                 name: data.name,
                 rc_id: id,
                 rc_username: data.username,
                 slug: data.username,
-                profile_image: data.avatarUrl, 
+                profile_image: getAvatar(data.username, rcUrl),
                 email: getVerifiedEmail(data.emails),
                 password: crypto.randomBytes(20).toString('hex'),
                 blogTitle: blogTitle,
@@ -496,7 +516,7 @@ authentication = {
                     return rcUtils.getMe(rcUid, rcToken)
                         .then((invitedBy) => {
                             if (!invitedBy.success) {
-                                throw new common.errors.NotFoundError({message: 'User not found. Make Sure you are logged in on RC.'});
+                                throw new common.errors.NotFoundError({message: common.i18n.t('errors.models.user.rc.userNotFound')});
                             }
                             if (inviteOnly) { //Check that rc_uid is of Owner/Admin
                                 return models.User.findOne({rc_id: rcUid, role: 'Owner' || 'Administrator', status: 'all'}, options)
@@ -504,7 +524,7 @@ authentication = {
                                         if (user) {
                                             return invitation;
                                         } else {
-                                            throw new common.errors.NotFoundError({message: 'You are not authorized to add new authors'});
+                                            throw new common.errors.NotFoundError({message: common.i18n.t('errors.models.user.notEnoughPermission')});
                                         }
                                     });
                             } else {// Self Invitation
@@ -521,7 +541,7 @@ authentication = {
                     if (user.success && user.user) {
                         const u = user.user;
                         if (!u.emails){
-                            throw new common.errors.NotFoundError({message: 'Cannot create account without email.'});
+                            throw new common.errors.NotFoundError({message: common.i18n.t('errors.models.user.rc.noEmail')});
                         }
                         const email = getVerifiedEmail(u.emails);
                         const role = data.role.name || 'Author';
@@ -530,7 +550,7 @@ authentication = {
                                 return models.User.add({
                                     rc_id: u._id,
                                     rc_username: u.username,
-                                    profile_image: u.avatarUrl,
+                                    profile_image: getAvatar(u.username),
                                     slug: u.username,
                                     email: email,
                                     name: u.name,
@@ -539,7 +559,7 @@ authentication = {
                                 }, localOptions);
                             });
                     } else {
-                        throw new common.errors.NotFoundError({message: 'User not found. Make Sure you are logged in on RC.'});
+                        throw new common.errors.NotFoundError({message: common.i18n.t('errors.models.user.rc.userNotFound')});
                     }
                 });
         }

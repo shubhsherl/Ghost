@@ -205,7 +205,7 @@ module.exports = function apiRoutes() {
     // router.del('/invites/:id', mw.authAdminApi, http(apiv2.invites.destroy));
 
     // ## RC Incoming Webhook
-    router.post('/rhooks/:id/:token', http(apiv2.rhooks.callbacks));
+    router.post('/rhooks/:token', http(apiv2.rhooks.callbacks));
 
     // ## RC Api
     router.get('/rcapi', mw.authAdminApi, http(apiv2.rcapi.browse));
