@@ -10,9 +10,10 @@ const config = require('../../../config');
  * @param {String} postUrl
  * @param {Object} routerOptions
  * @param {Objec†} locals
+ * @param {Objec†} rcAuthValues
  * @returns {*}
  */
-function entryLookup(postUrl, routerOptions, locals) {
+function entryLookup(postUrl, routerOptions, locals, rcAuthValues) {
     debug(postUrl);
 
     const api = require('../../../api')[locals.apiVersion];
@@ -44,7 +45,8 @@ function entryLookup(postUrl, routerOptions, locals) {
          * @deprecated: `author`, will be removed in Ghost 3.0
          * @TODO: Remove "author" when we drop v0.1
          */
-        include: 'author,authors,tags'
+        include: 'author,authors,tags',
+        original: rcAuthValues || {},
     };
 
     if (config.get('enableDeveloperExperiments')) {

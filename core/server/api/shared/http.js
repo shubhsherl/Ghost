@@ -19,16 +19,19 @@ const http = (apiImpl) => {
         let apiKey = null;
         let integration = null;
         let user = null;
-        let rc_uid = null;
-        let rc_token = null;
-        
-        if(req.headers && req.headers.cookie)
-            _.forEach(req.headers.cookie.split(';'), (v)=>{
-                if(v.includes('rc_uid'))
-                    rc_uid = v.split('=')[1];
-                if(v.includes('rc_token'))
-                    rc_token = v.split('=')[1];
+        let rcUid = null;
+        let rcToken = null;
+
+        if (req.headers && req.headers.cookie) {
+            _.forEach(req.headers.cookie.split(';'), (v) => {
+                if (v.includes('rc_uid')) {
+                    rcUid = v.split('=')[1];
+                }
+                if (v.includes('rc_token')) {
+                    rcToken = v.split('=')[1];
+                }
             });
+        }
 
         if (req.api_key) {
             apiKey = {
@@ -50,8 +53,8 @@ const http = (apiImpl) => {
             file: req.file,
             files: req.files,
             query: req.query,
-            rc_uid: rc_uid,
-            rc_token: rc_token,
+            rc_uid: rcUid,
+            rc_token: rcToken,
             params: req.params,
             user: req.user,
             context: {
@@ -61,12 +64,12 @@ const http = (apiImpl) => {
                 member: (req.member || null)
             }
         });
-
+        
         frame.configure({
             options: apiImpl.options,
             data: apiImpl.data
         });
-
+        
         apiImpl(frame)
             .then((result) => {
                 return shared.headers.get(result, apiImpl.headers, frame)

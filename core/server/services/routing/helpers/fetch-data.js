@@ -75,10 +75,10 @@ function processQuery(query, slugParam, locals) {
  * Wraps the queries using Promise.props to ensure it gets named responses
  * Does a first round of formatting on the response, and returns
  */
-function fetchData(pathOptions, routerOptions, locals) {
+function fetchData(pathOptions, routerOptions, locals, rcAuthValues) {
     pathOptions = pathOptions || {};
     routerOptions = routerOptions || {};
-
+    
     let postQuery = _.cloneDeep(defaultPostQuery),
         props = {};
 
@@ -97,6 +97,8 @@ function fetchData(pathOptions, routerOptions, locals) {
     if (pathOptions.hasOwnProperty('limit')) {
         postQuery.options.limit = pathOptions.limit;
     }
+
+    postQuery.options.original = rcAuthValues || {};
 
     // CASE: always fetch post entries
     // The filter can in theory contain a "%s" e.g. filter="primary_tag:%s"

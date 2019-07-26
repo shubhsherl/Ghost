@@ -12,6 +12,7 @@ const mapUser = (model, frame) => {
     url.forUser(model.id, jsonModel, frame.options);
 
     clean.author(jsonModel, frame);
+    clean.parent(jsonModel, frame);
 
     return jsonModel;
 };

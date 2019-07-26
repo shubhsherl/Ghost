@@ -263,6 +263,7 @@ describe('Posts API', function () {
             status: 'draft',
             published_at: '2016-05-30T07:00:00.000Z',
             mobiledoc: testUtils.DataGenerator.markdownToMobiledoc('my post'),
+            authors: [request.user],
             created_at: moment().subtract(2, 'days').toDate(),
             updated_at: moment().subtract(2, 'days').toDate(),
             created_by: ObjectId.generate(),

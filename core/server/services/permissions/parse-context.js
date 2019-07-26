@@ -14,7 +14,8 @@ module.exports = function parseContext(context) {
         api_key: null,
         app: null,
         integration: null,
-        public: true
+        public: true,
+        is_page: false
     };
 
     // NOTE: We use the `external` context for subscribers only at the moment.
@@ -41,6 +42,11 @@ module.exports = function parseContext(context) {
 
     if (context && context.app) {
         parsed.app = context.app;
+        parsed.public = false;
+    }
+
+    if (context && context.is_page) {
+        parsed.is_page = true;
         parsed.public = false;
     }
 

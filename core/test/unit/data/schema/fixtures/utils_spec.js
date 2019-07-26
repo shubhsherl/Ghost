@@ -104,11 +104,11 @@ describe('Migration Fixture Utils', function () {
             fixtureUtils.addFixturesForModel(fixtures.models[5]).then(function (result) {
                 should.exist(result);
                 result.should.be.an.Object();
-                result.should.have.property('expected', 7);
-                result.should.have.property('done', 7);
+                result.should.have.property('expected', 9);
+                result.should.have.property('done', 9);
 
-                postOneStub.callCount.should.eql(7);
-                postAddStub.callCount.should.eql(7);
+                postOneStub.callCount.should.eql(9);
+                postAddStub.callCount.should.eql(9);
 
                 done();
             }).catch(done);
@@ -121,10 +121,10 @@ describe('Migration Fixture Utils', function () {
             fixtureUtils.addFixturesForModel(fixtures.models[5]).then(function (result) {
                 should.exist(result);
                 result.should.be.an.Object();
-                result.should.have.property('expected', 7);
+                result.should.have.property('expected', 9);
                 result.should.have.property('done', 0);
 
-                postOneStub.callCount.should.eql(7);
+                postOneStub.callCount.should.eql(9);
                 postAddStub.callCount.should.eql(0);
 
                 done();
@@ -150,19 +150,19 @@ describe('Migration Fixture Utils', function () {
             fixtureUtils.addFixturesForRelation(fixtures.relations[0]).then(function (result) {
                 should.exist(result);
                 result.should.be.an.Object();
-                result.should.have.property('expected', 64);
-                result.should.have.property('done', 64);
+                result.should.have.property('expected', 63);
+                result.should.have.property('done', 63);
 
                 // Permissions & Roles
                 permsAllStub.calledOnce.should.be.true();
                 rolesAllStub.calledOnce.should.be.true();
-                dataMethodStub.filter.callCount.should.eql(64);
+                dataMethodStub.filter.callCount.should.eql(63);
                 dataMethodStub.find.callCount.should.eql(5);
-                baseUtilAttachStub.callCount.should.eql(64);
+                baseUtilAttachStub.callCount.should.eql(63);
 
-                fromItem.related.callCount.should.eql(64);
-                fromItem.findWhere.callCount.should.eql(64);
-                toItem[0].get.callCount.should.eql(128);
+                fromItem.related.callCount.should.eql(63);
+                fromItem.findWhere.callCount.should.eql(63);
+                toItem[0].get.callCount.should.eql(126);
 
                 done();
             }).catch(done);

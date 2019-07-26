@@ -2581,6 +2581,8 @@
                 "users": [
                     {
                         "id": "1",
+                        "rc_id": "Jjwjg6gouWLXhMGKw",
+                        "rc_username": "joe.b",
                         "name": "Joe Bloggs",
                         "slug": "joe-bloggs",
                         "ghost_auth_access_token": null,
@@ -2609,6 +2611,8 @@
                     },
                     {
                         "id": "5951f5fca366002ebd5dbef7",
+                        "rc_id": "Jjwjg6gouWlXhMGKw",
+                        "rc_username": "ghost.user",
                         "name": "Ghost",
                         "slug": "ghost",
                         "ghost_auth_access_token": null,

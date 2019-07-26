@@ -26,7 +26,14 @@ const nonePublicAuth = (apiConfig, frame) => {
         permissionIdentifier = apiConfig.identifier(frame);
     }
 
-    const unsafeAttrObject = apiConfig.unsafeAttrs && _.has(frame, `data.[${apiConfig.docName}][0]`) ? _.pick(frame.data[apiConfig.docName][0], apiConfig.unsafeAttrs) : {};
+    var unsafeAttrObject = apiConfig.unsafeAttrs && _.has(frame, `data.[${apiConfig.docName}][0]`) ? _.pick(frame.data[apiConfig.docName][0], apiConfig.unsafeAttrs) : {};
+    
+    // CASE: page is begin targeted.
+    if (_.has(frame, `data.[pages][0]`) && _.isEmpty(unsafeAttrObject)) {
+        unsafeAttrObject = apiConfig.unsafeAttrs ? _.pick(frame.data.pages[0], apiConfig.unsafeAttrs) : {};
+        frame.options.context.is_page = true;
+    }
+    
     const permsPromise = permissions.canThis(frame.options.context)[apiConfig.method][singular](permissionIdentifier, unsafeAttrObject);
 
     return permsPromise.then((result) => {

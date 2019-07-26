@@ -17,6 +17,35 @@
                     "type": "string",
                     "maxLength": 191
                 },
+                "room_name": {
+                    "type": ["string", "null"],
+                    "maxLength": 256
+                },
+                "room_id": {
+                    "type": ["string", "null"],
+                    "maxLength": 17
+                },
+                "discussion_room_id": {
+                    "type": ["string", "null"],
+                    "maxLength": 17
+                },
+                "discussion_room_name": {
+                    "type": ["string", "null"],
+                    "maxLength": 256
+                },
+                "discussion_room_type": {
+                    "type": ["string", "null"],
+                    "maxLength": 1
+                },
+                "is_private": {
+                    "type": "boolean"
+                },
+                "announce": {
+                    "type": "boolean"
+                },
+                "collaborate": {
+                    "type": "boolean"
+                },
                 "mobiledoc": {
                     "type": ["string", "null"],
                     "maxLength": 1000000000
@@ -96,6 +125,19 @@
                     "maxLength": 300
                 },
                 "twitter_description": {
+                    "type": ["string", "null"],
+                    "maxLength": 500
+                },
+                "rc_image": {
+                    "type": ["string", "null"],
+                    "format": "uri-reference",
+                    "maxLength": 2000
+                },
+                "rc_title": {
+                    "type": ["string", "null"],
+                    "maxLength": 300
+                },
+                "rc_description": {
                     "type": ["string", "null"],
                     "maxLength": 500
                 },

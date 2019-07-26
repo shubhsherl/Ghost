@@ -80,7 +80,7 @@
             "defaultValue" : ""
         },
         "ghost_foot": {
-            "defaultValue" : ""
+            "defaultValue" : "<script>var searchSettings={key:'API_KEY',url:'http://localhost:2368',options:{keys:['title'],limit:10},api:{resource:'posts',parameters:{limit:'10',fields:['title','slug'],filter:'',include:'',order:'',formats:''}}}</script>"
         },
         "facebook": {
             "defaultValue" : "ghost"
@@ -92,7 +92,7 @@
             "defaultValue": "{}"
         },
         "navigation": {
-            "defaultValue": "[{\"label\":\"Home\", \"url\":\"/\"},{\"label\":\"Tag\", \"url\":\"/tag/getting-started/\"}, {\"label\":\"Author\", \"url\":\"/author/ghost/\"},{\"label\":\"Help\", \"url\":\"https://docs.ghost.org\"}]"
+            "defaultValue": "[{\"label\":\"Home\", \"url\":\"/\"},{\"label\":\"Tags\", \"url\":\"/tags/\"}, {\"label\":\"Authors\", \"url\":\"/authors/\"},{\"label\":\"Help\", \"url\":\"https://docs.ghost.org\"}]"
         },
         "slack": {
             "defaultValue": "[{\"url\":\"\", \"username\":\"Ghost\"}]"
@@ -103,15 +103,21 @@
     },
     "theme": {
         "active_theme": {
-            "defaultValue": "casper"
+            "defaultValue": "Mapache"
         }
     },
     "rc_settings": {
         "server_url": {
             "defaultValue": "http://localhost:4000"
         },
-        "room": {
-            "defaultValue": "articles",
+        "announce_token": {
+            "defaultValue": "hookid/tokentoannounce"
+        },
+        "settings_token": {
+            "defaultValue": "hookid/tokentosyncdb"
+        },
+        "room_name": {
+            "defaultValue": "general",
             "validations": {
                 "isLength": {
                     "max": 150
@@ -119,7 +125,7 @@
             }
         },
         "room_id": {
-            "defaultValue": "ridOfAboveRoom",
+            "defaultValue": "GENERAL",
             "validations": {
                 "isLength": {
                     "max": 17
@@ -145,6 +151,12 @@
             }
         },
         "invite_only": {
+            "defaultValue": "false",
+            "validations": {
+                "isIn": [["true", "false"]]
+            }
+        },
+        "can_collaborate": {
             "defaultValue": "false",
             "validations": {
                 "isIn": [["true", "false"]]

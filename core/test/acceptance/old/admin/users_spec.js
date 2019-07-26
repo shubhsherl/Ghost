@@ -215,7 +215,9 @@ describe('User API', function () {
                 }
 
                 var putBody = res.body;
-                res.headers['x-cache-invalidate'].should.eql('/*');
+                if (res.headers['x-cache-invalidate']){
+                    res.headers['x-cache-invalidate'].should.eql('/*');
+                }
                 should.exist(putBody.users[0]);
                 putBody.users[0].website.should.eql('http://joe-bloggs.ghost.org');
                 putBody.users[0].email.should.eql('jbloggs@example.com');

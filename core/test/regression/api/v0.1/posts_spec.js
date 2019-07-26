@@ -656,6 +656,7 @@ describe('Post API', function () {
                     posts: [{
                         status: 'published',
                         published_at: '2016-05-30T07:00:00.000Z',
+                        authors: [request.user],
                         mobiledoc: markdownToMobiledoc()
                     }]
                 };
@@ -714,6 +715,7 @@ describe('Post API', function () {
                             status: 'draft',
                             title: newTitle,
                             mobiledoc: markdownToMobiledoc('my post'),
+                            authors: [request.user],
                             tags: [newTag]
                         }]
                     };
@@ -901,6 +903,7 @@ describe('Post API', function () {
                             status: 'draft',
                             title: newTitle,
                             mobiledoc: markdownToMobiledoc('my post'),
+                            authors: [request.user],
                             tags: [newTag]
                         }]
                     };
@@ -953,6 +956,7 @@ describe('Post API', function () {
                             status: 'published',
                             title: newTitle,
                             mobiledoc: markdownToMobiledoc('my post'),
+                            authors: [request.user],
                             tags: [newTag]
                         }]
                     };

@@ -48,7 +48,17 @@ User = ghostBookshelf.Model.extend({
 
         return (options.transacting || ghostBookshelf.knex)('roles_users')
             .where('user_id', model.id)
-            .del();
+            .del()
+            .then(() => {
+                return (options.transacting || ghostBookshelf.knex)('parents_users')
+                    .where('user_id', model.id)
+                    .del()
+                    .then(() => {
+                        return (options.transacting || ghostBookshelf.knex)('parents_users')
+                            .where('parent_id', model.id)
+                            .update({ parent_id: options.context.user });
+                    })
+            });
     },
 
     onDestroyed: function onDestroyed(model, options) {
@@ -262,6 +272,10 @@ User = ghostBookshelf.Model.extend({
         return this.belongsToMany('Role');
     },
 
+    parents: function parents() {
+        return this.belongsToMany('User', 'parents_users', 'user_id', 'parent_id');
+    },
+
     permissions: function permissions() {
         return this.belongsToMany('Permission');
     },
@@ -271,6 +285,14 @@ User = ghostBookshelf.Model.extend({
 
         return roles.some(function getRole(role) {
             return role.get('name') === roleName;
+        });
+    },
+
+    isParent: function isParent(id) {
+        var parents = this.related('parents');
+
+        return parents.some(function getParent(parent) {
+            return parent.get('parent_id') === id;
         });
     },
 
@@ -442,6 +464,14 @@ User = ghostBookshelf.Model.extend({
             );
         }
 
+        if (data.parents && data.parents.length > 1) {
+            return Promise.reject(
+                new common.errors.ValidationError({
+                    message: 'Only One Parent is supported'
+                })
+            );
+        }
+
         if (data.email) {
             ops.push(function checkForDuplicateEmail() {
                 return self.getByEmail(data.email, options).then(function then(user) {
@@ -481,6 +511,34 @@ User = ghostBookshelf.Model.extend({
                         // assign all other roles
                         return user.roles().updatePivot({role_id: roleId});
                     }
+                }).then(() => {
+                    options.status = 'all';
+                    return self.findOne({id: user.id}, options);
+                }).then((model) => {
+                    model._changed = user._changed;
+                    return model;
+                });
+            });
+        });
+
+        ops.push(function updateParents() {
+            return ghostBookshelf.Model.edit.call(self, data, options).then((user) => {
+                var parentId;
+
+                if (!data.parents) {
+                    return user;
+                }
+
+                parentId = data.parents[0].id || data.parents[0];
+
+                return user.parents().fetch().then((roles) => {
+                    // return if the role is already assigned
+                    if (parents.models[0].id === parentId) {
+                        return;
+                    }
+                }).then(() => {
+                        // assign all other roles
+                        return user.parents().updatePivot({parent_id: parentId});
                 }).then(() => {
                     options.status = 'all';
                     return self.findOne({id: user.id}, options);
@@ -571,6 +629,11 @@ User = ghostBookshelf.Model.extend({
             })
             .then(function () {
                 return baseUtils.attach(User, userData.id, 'roles', roles, options);
+            })
+            .then(function () {
+                // ADD: created_by as parents of the user created
+                const parents = [userData.get('created_by')];
+                return baseUtils.attach(User, userData.id, 'parents', parents, options);
             })
             .then(function then() {
                 // find and return the added user
@@ -694,7 +757,7 @@ User = ghostBookshelf.Model.extend({
                 hasUserPermission = loadedPermissions.user && _.some(loadedPermissions.user.roles, {name: 'Owner'});
             } else if (loadedPermissions.user && _.some(loadedPermissions.user.roles, {name: 'Editor'})) {
                 // If the user we are trying to edit is an Author or Contributor, allow it
-                hasUserPermission = userModel.hasRole('Author') || userModel.hasRole('Contributor');
+                hasUserPermission = userModel.hasRole('Contributor') && userModel.isParent(context.user);
             }
         }
 
@@ -708,8 +771,8 @@ User = ghostBookshelf.Model.extend({
 
             // Users with the role 'Editor' have complex permissions when the action === 'destroy'
             if (loadedPermissions.user && _.some(loadedPermissions.user.roles, {name: 'Editor'})) {
-                // Alternatively, if the user we are trying to edit is an Author, allow it
-                hasUserPermission = context.user === userModel.get('id') || userModel.hasRole('Author') || userModel.hasRole('Contributor');
+                // Alternatively, if the user we are trying to edit is his/her contributor, allow it
+                hasUserPermission = context.user === userModel.get('id') || (userModel.hasRole('Contributor') && userModel.isParent(context.user));
             }
         }
 
