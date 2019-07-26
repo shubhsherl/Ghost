@@ -7,10 +7,6 @@ module.exports = {
         return require('./pages');
     },
 
-    get invites() {
-        return require('./invites');
-    },
-
     get settings() {
         return require('./settings');
     },

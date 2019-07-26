@@ -54,7 +54,7 @@ const session = {
             });
         });
     },
-
+    
     delete() {
         return Promise.resolve((req, res, next) => {
             auth.session.destroySession(req, res, next);

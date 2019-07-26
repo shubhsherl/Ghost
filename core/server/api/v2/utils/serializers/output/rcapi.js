@@ -9,7 +9,7 @@ module.exports = {
         }
 
         frame.response = {
-            rc_users: [models]
+            data : [models]
         };
 
         debug(frame.response);

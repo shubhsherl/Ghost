@@ -32,7 +32,6 @@ models = [
     'tag-public',
     'user',
     'author',
-    'invite',
     'webhook',
     'integration',
     'api-key',

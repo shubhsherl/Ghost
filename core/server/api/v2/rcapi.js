@@ -7,7 +7,8 @@ module.exports = {
     browse: {
         options: [
             'include',
-            'name',
+            'uname',
+            'rname',
             'page',
             'limit',
             'fields',
@@ -22,12 +23,38 @@ module.exports = {
         },
         permissions: false,
         query(frame) {
-            let username = frame.options.name;
+            let username = frame.options.uname;
+            let roomname = frame.options.rname;
+            if (username)
+                return rcUtils.validateUser(frame.original.rc_uid, frame.original.rc_token, username)
+                    .then((user) => {
+                        return user;
+                    });
+            return rcUtils.validateRoom(frame.original.rc_uid, frame.original.rc_token, roomname)
+                .then((room) => {
+                    return room;
+                });
+        }
+    },
 
-            return rcUtils.validateUser(frame.original.rc_uid, frame.original.rc_token, username)
-                .then((user) =>{
-                    return user;
-                })
+    collaborate: {
+        options: [],
+        data: [
+            'collaboration'
+        ],
+        validation: {
+            options: {
+                include: ALLOWED_INCLUDES,
+            }
+        },
+        permissions: false,
+        query(frame) {
+            const {rc_id, post_id, post} = frame.data.collaboration[0]
+
+            return rcUtils.collaborate(frame.original.rc_uid, frame.original.rc_token, rc_id, post_id, post)
+                .then((res) => {
+                    return res;
+                });
         }
     }
 };

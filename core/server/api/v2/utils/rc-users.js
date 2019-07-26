@@ -1,8 +1,5 @@
 const Promise = require('bluebird');
 const request = require('request');
-const { forEach } = require('lodash');
-const models = require('../../../models');
-const auth = require('../../../services/auth');
 const settingsCache = require('../../../services/settings/cache');
 const common = require('../../../lib/common');
 
@@ -19,22 +16,15 @@ function buildUserQuery(username) {
     return getRCUrl() + '/api/v1/users.info?' + `username=${username}`;
 }
 
+function buildRoomQuery(roomname) {
+    return getRCUrl() + '/api/v1/rooms.info?' + `roomName=${roomname}`;
+}
+
 function getHeader(id, token) {
     return {
         'X-Auth-Token': token,
         'X-User-Id': id
     };
-}
-
-function getIdToken(req) {
-    let id, token;
-    forEach(req.headers.cookie.split(';'), (v) => {
-        if (v.includes('rc_uid'))
-            id = v.split('=')[1];
-        if (v.includes('rc_token'))
-            token = v.split('=')[1];
-    });
-    return { id, token };
 }
 
 module.exports = {
@@ -108,12 +98,14 @@ module.exports = {
                 if (result && result.success) {
                     u = result.user;
                     user = {
+                        type: 'rc_users',
                         exist: true,
-                        rid: u._id,
+                        uid: u._id,
                         username: u.username,
                     };
                 } else {
                     user = {
+                        type: 'rc_users',
                         exist: false,
                     };
                 }
@@ -122,22 +114,29 @@ module.exports = {
         });
     },
 
-    createSession(req) {
-        const { id, token } = getIdToken(req);
-        if (!id || !token)
-            return req;
-        return models.User.findOne({ rc_id: id }).then((user) => {
-            if (!user) {
-                return req;
-            }
-            return this.getMe(id, token)
-                .then((u) => {
-                    if (!u.success) {
-                        return req;
-                    }
-                    req.user = user;
-                    return req;
-                });
+    validateRoom(id, token, roomName) {
+        let room;
+        return new Promise((resolve) => {
+            request.get({ url: buildRoomQuery(roomName), headers: getHeader(id, token) }, function (e, r, body) {
+                let result;
+                if (body)
+                    result = JSON.parse(body);
+                if (result && result.success) {
+                    r = result.room;
+                    room = {
+                        type: 'rc_rooms',
+                        exist: true,
+                        rid: r._id,
+                        roomname: r.name,
+                    };
+                } else {
+                    room = {
+                        type: 'rc_rooms',
+                        exist: false,
+                    };
+                }
+                resolve(room);
+            });
         });
     }
 };
