@@ -7,13 +7,14 @@
  * Text = length 65535 (64 KiB)
  * Long text = length 1,000,000,000
  */
-//TODO change NULLABLE, UNIQUE, 
+
 module.exports = {
     posts: {
         id: {type: 'string', maxlength: 24, nullable: false, primary: true},
         uuid: {type: 'string', maxlength: 36, nullable: false, validations: {isUUID: true}},
         room_id: {type: 'string', maxlength: 17, nullable: true, unique: false},
         discussion_room_id: {type: 'string', maxlength: 17, nullable: true, unique: false},
+        is_private: {type: 'bool', nullable: true, defaultTo: false},
         title: {type: 'string', maxlength: 2000, nullable: false, validations: {isLength: {max: 255}}},
         slug: {type: 'string', maxlength: 191, nullable: false, unique: true},
         mobiledoc: {type: 'text', maxlength: 1000000000, fieldtype: 'long', nullable: true},

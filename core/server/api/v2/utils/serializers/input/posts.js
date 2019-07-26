@@ -13,6 +13,14 @@ function removeMobiledocFormat(frame) {
     }
 }
 
+function removePrivatePosts(frame) {
+    if (frame.options.filter) {
+        frame.options.filter = `(${frame.options.filter})+is_private:false`;
+    } else {
+        frame.options.filter = 'is_private:false';
+    }
+}
+
 function includeTags(frame) {
     if (!frame.options.withRelated) {
         frame.options.withRelated = ['tags'];
@@ -93,7 +101,10 @@ module.exports = {
         if (localUtils.isContentAPI(frame)) {
             // CASE: the content api endpoint for posts should not return mobiledoc
             removeMobiledocFormat(frame);
-
+            
+            // CASE: the content api endpoint for posts should not include private posts
+            removePrivatePosts(frame);
+            
             // CASE: Members needs to have the tags to check if its allowed access
             if (labs.isSet('members')) {
                 includeTags(frame);

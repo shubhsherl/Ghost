@@ -37,6 +37,9 @@
                     "type": ["string", "null"],
                     "maxLength": 1
                 },
+                "is_private": {
+                    "type": "boolean"
+                },
                 "announce": {
                     "type": "boolean"
                 },

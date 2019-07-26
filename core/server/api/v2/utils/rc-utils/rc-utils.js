@@ -92,6 +92,8 @@ function parseBody(body, type) {
                 addRoom(room);
             }
             return room;
+        case 'subscription':
+            return {exist: !!result.subscription};
         default:
             return failResult;
     }
@@ -229,15 +231,9 @@ module.exports = {
     },
 
     validateSubscription(id, token, roomId) {
-        let subscription;
         return new Promise((resolve) => {
             request.get({url: api.buildSubscriptionQuery(roomId), headers: api.getHeader(id, token)}, function (e, r, body) {
-                let result;
-
-                if (body)
-                    result = JSON.parse(body);
-                subscription = {exist: result && result.success && !!result.subscription};
-                resolve(subscription);
+                resolve(parseBody(body, 'subscription'));
             });
         });
     }
