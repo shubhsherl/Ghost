@@ -62,7 +62,7 @@ const privateBlogging = {
         res.isPrivateBlog = true;
 
         return session({
-            maxAge: constants.ONE_HOUR_S,
+            maxAge: constants.ONE_MONTH_S,
             signed: false
         })(req, res, next);
     },
@@ -116,9 +116,11 @@ const privateBlogging = {
             url;
 
         if (isVerified) {
+            console.log('ver');
             return next();
         } else {
             return isRCMember(req.headers.cookie).then((verified) => {
+                console.log('rc');
                 if (verified) {
                     const pass = settingsCache.get('password');
                     const hasher = crypto.createHash('sha256');
