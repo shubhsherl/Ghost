@@ -62,10 +62,12 @@ function setupTasks(setupData) {
     let tasks;
 
     function validateData(setupData) {
-        const id = setupData['setup'][0].rc_id;
-        const token = setupData['setup'][0].rc_token;
-        const blogTitle = setupData['setup'][0].blogTitle;
-        const rcUrl = setupData['setup'][0].rc_url;
+        const id = setupData.setup[0].rc_id;
+        const token = setupData.setup[0].rc_token;
+        const blogTitle = setupData.setup[0].blogTitle;
+        const rcUrl = setupData.setup[0].rc_url;
+        const announceToken = setupData.setup[0].announce_token;
+        const settingsToken = setupData.setup[0].settings_token;
         return rcUtils.checkAdmin(rcUrl, id, token).then((data) => {
             const email = data.emails[0].address;
             return {
@@ -74,8 +76,10 @@ function setupTasks(setupData) {
                 rc_username: data.username,
                 profile_image: data.avatarUrl, 
                 email: email,
-                password: "qwe123qwe123",//TODO set random password
+                password: 'qwe123qwe123',//TODO set random password
                 blogTitle: blogTitle,
+                announce_token: announceToken,
+                settings_token: settingsToken,
                 serverUrl: rcUrl,
                 status: 'active'
             };
@@ -106,6 +110,8 @@ function setupTasks(setupData) {
         const user = data.user,
             blogTitle = data.userData.blogTitle,
             serverUrl = data.userData.serverUrl,
+            announceToken = data.userData.announce_token,
+            settingsToken = data.userData.settings_token,
             context = {context: {user: data.user.id}};
 
         let userSettings;
@@ -117,6 +123,8 @@ function setupTasks(setupData) {
         userSettings = [
             {key: 'server_url', value: serverUrl},
             {key: 'title', value: blogTitle.trim()},
+            {key: 'announce_token', value: announceToken},
+            {key: 'settings_token', value: settingsToken},
             {key: 'description', value: common.i18n.t('common.api.authentication.sampleBlogDescription')}
         ];
 
@@ -447,37 +455,36 @@ authentication = {
         return pipeline(tasks, invitation);
     },
 
-        /**
+    /**
      * ### Add Users
      * @param {Object} invitation an invitation object
      * @returns {Promise<Object>}
      */
     addUser(invitation, option) {
-        let tasks,
-            invite;
+        let tasks;
         const options = {context: {internal: true}, withRelated: ['roles']};
         const localOptions = {context: {internal: true}};
         // 1. if admin adds user, option.
         // 2. if user creating account, invitation.
-        const rc_uid = option.rc_uid || invitation.user[0].rc_uid;
-        const rc_token = option.rc_token || invitation.user[0].rc_token;
+        const rcUid = option.rc_uid || invitation.user[0].rc_uid;
+        const rcToken = option.rc_token || invitation.user[0].rc_token;
 
         function validateInvitation(invitation) {
-            return models.Settings.findOne({ key: 'invite_only' }, localOptions)
+            return models.Settings.findOne({key: 'invite_only'}, localOptions)
                 .then((setting) => {
                     const inviteOnly = setting.attributes.value;
-                    return rcUtils.getMe(rc_uid, rc_token)
+                    return rcUtils.getMe(rcUid, rcToken)
                         .then((invitedBy) => {
                             if (!invitedBy.success) {
-                                throw new common.errors.NotFoundError({ message: "User not found. Make Sure you are logged in on RC." });
+                                throw new common.errors.NotFoundError({message: 'User not found. Make Sure you are logged in on RC.'});
                             }
                             if (inviteOnly) { //Check that rc_uid is of Owner/Admin
-                                return models.User.findOne({ rc_id: rc_uid, role: 'Owner'||'Administrator', status: 'all'}, options)
+                                return models.User.findOne({rc_id: rcUid, role: 'Owner' || 'Administrator', status: 'all'}, options)
                                     .then((user) => {
                                         if (user) {
                                             return invitation;
                                         } else {
-                                            throw new common.errors.NotFoundError({ message: "You are not authorized to add new authors" });
+                                            throw new common.errors.NotFoundError({message: 'You are not authorized to add new authors'});
                                         }
                                     });
                             } else {// Self Invitation
@@ -489,28 +496,28 @@ authentication = {
 
         function processInvitation(invitation) {
             const data = invitation.user[0];
-            return rcUtils.getUser(rc_uid, rc_token, data.rc_username)
+            return rcUtils.getUser(rcUid, rcToken, data.rc_username)
                 .then((user) => {
                     if (user.success && user.user) {
                         const u = user.user;
-                        if(!u.emails){
-                            throw new common.errors.NotFoundError({ message: "Cannot create account without email." });
+                        if (!u.emails){
+                            throw new common.errors.NotFoundError({message: 'Cannot create account without email.'});
                         }
                         const email = u.emails[0].address;
-                        const role = data.role.name||'Author';
+                        const role = data.role.name || 'Author';
                         return models.Role.findOne({name: role})
                             .then((r) => {
-                            return models.User.add({
-                                rc_id: u._id,
-                                rc_username: u.username,
-                                email: email,
-                                name: u.name,
-                                password: "qwe123qwe123",//TODO Random password
-                                roles: [r]
-                            }, localOptions);
+                                return models.User.add({
+                                    rc_id: u._id,
+                                    rc_username: u.username,
+                                    email: email,
+                                    name: u.name,
+                                    password: 'qwe123qwe123',//TODO Random password
+                                    roles: [r]
+                                }, localOptions);
                             });
                     } else {
-                        throw new common.errors.NotFoundError({message: "User not found. Make Sure you are logged in on RC."});
+                        throw new common.errors.NotFoundError({message: 'User not found. Make Sure you are logged in on RC.'});
                     }
                 });
         }

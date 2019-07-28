@@ -8,7 +8,7 @@ module.exports = {
             return;
         }
         frame.response = {
-            data: [models]
+            success: true
         };
 
         debug(frame.response);

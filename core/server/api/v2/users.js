@@ -51,9 +51,9 @@ module.exports = {
             return rcUtils.getMe(option.rc_uid, option.rc_token)
                 .then((u) => {
                     if (!u.success) {
-                        throw new common.errors.NotFoundError({ message: "User not found. Make Sure you are logged in on RC." });
+                        throw new common.errors.NotFoundError({message: 'User not found. Make Sure you are logged in on RC.'});
                     }
-                    return models.User.findOne({ rc_id: u._id }, localOptions)
+                    return models.User.findOne({rc_id: u._id}, localOptions)
                         .then((model) => {
                             return model;
                         });

@@ -64,6 +64,10 @@ const forPost = (attrs, options) => {
         attrs.twitter_image = handleImageUrl(attrs.twitter_image);
     }
 
+    if (attrs.rc_image) {
+        attrs.rc_image = handleImageUrl(attrs.rc_image);
+    }
+
     if (attrs.canonical_url) {
         attrs.canonical_url = handleCanonicalUrl(attrs.canonical_url);
     }
