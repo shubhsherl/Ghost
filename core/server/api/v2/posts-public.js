@@ -63,9 +63,9 @@ module.exports = {
             function getModelWithDiscussionRoom(model) {
                 const rid = model.get('discussion_room_id');
                 if (rid) {
-                    return models.Room.findOne({rid: rid}).then((d) => {
-                        if (d) {
-                            const url = `${settingsCache.get('server_url')}/${d.get('type')==='p'?'group':'channel'}/${d.get('name')}`;
+                    return rcUtils.getRoom({_id: rid}).then((d) => {
+                        if (d.exist) {
+                            const url = `${settingsCache.get('server_url')}/${d.type==='p'?'group':'channel'}/${d.roomname}`;
                             model.attributes.discussion_room = url;
                         }
                         return model;
@@ -81,7 +81,7 @@ module.exports = {
                         });
                     }
                     if (model.get('is_private') && model.get('room_id')) {
-                        return rcUtils.validateSubscription(frame.original.rc_uid, frame.original.rc_token, model.get('room_id'))
+                        return rcUtils.validateSubscription(frame.original.rc_uid, model.get('room_id'))
                             .then((s) => {
                                 if(s.exist) {
                                     return getModelWithDiscussionRoom(model);

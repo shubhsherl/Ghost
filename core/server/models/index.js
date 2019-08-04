@@ -29,7 +29,6 @@ models = [
     'session',
     'subscriber',
     'tag',
-    'room',
     'tag-public',
     'user',
     'author',

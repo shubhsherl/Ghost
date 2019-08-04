@@ -78,7 +78,6 @@ module.exports = function apiRoutes() {
     router.get('/users/email/:email', mw.authAdminApi, http(apiv2.users.read));
     // Public call: if user exist, based on rc_uid, and rc_token
     router.get('/userexist', http(apiv2.users.exist));
-    router.put('/users/password', mw.authAdminApi, http(apiv2.users.changePassword));
     router.put('/users/owner', mw.authAdminApi, http(apiv2.users.transferOwnership));
     router.put('/users/:id', mw.authAdminApi, http(apiv2.users.edit));
     router.del('/users/:id', mw.authAdminApi, http(apiv2.users.destroy));

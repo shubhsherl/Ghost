@@ -1,14 +1,12 @@
 const Promise = require('bluebird'),
     {extend, merge, omit, cloneDeep, assign, forEach} = require('lodash'),
     validator = require('validator'),
-    crypto = require('crypto'),
     config = require('../../config'),
     common = require('../../lib/common'),
     security = require('../../lib/security'),
     constants = require('../../lib/constants'),
     pipeline = require('../../lib/promise/pipeline'),
     mail = require('../../services/mail'),
-    settingsCache = require('../../services/settings/cache'),
     urlService = require('../../services/url'),
     localUtils = require('./utils'),
     rcUtils = require('../v2/utils/rc-utils'),
@@ -29,32 +27,6 @@ function checkSetup() {
     return authentication.isSetup().then((result) => {
         return result.setup[0].status;
     });
-}
-
-/**
- * Returns a verified email, if exist
- *
- * @return {String}
- */
-function getVerifiedEmail(emails) {
-    let email = emails[0].address;
-    forEach(emails, (e) => {
-        if(e.verified) 
-            email = e.address;
-    });
-    return email;
-}
-
-/**
- * Returns avatarUrl
- *
- * @return {String}
- */
-function getAvatar(username, url) {
-    if (!url) {
-        url = settingsCache.get('server_url');
-    }
-    return `${url.replace(/\/$/, '')}/avatar/${username}`;
 }
 
 /**
@@ -92,7 +64,6 @@ function setupTasks(setupData) {
     function validateData(setupData) {
         const id = setupData.setup[0].rc_id;
         const token = setupData.setup[0].rc_token;
-        const blogTitle = setupData.setup[0].blogTitle;
         const rcUrl = setupData.setup[0].rc_url;
         const announceToken = setupData.setup[0].announce_token;
         const settingsToken = setupData.setup[0].settings_token;
@@ -105,14 +76,8 @@ function setupTasks(setupData) {
         
         return rcUtils.checkAdmin(rcUrl, id, token).then((data) => {
             return {
-                name: data.name,
                 rc_id: id,
-                rc_username: data.username,
                 slug: data.username,
-                profile_image: getAvatar(data.username, rcUrl),
-                email: getVerifiedEmail(data.emails),
-                password: crypto.randomBytes(20).toString('hex'),
-                blogTitle: blogTitle,
                 announce_token: announceToken,
                 settings_token: settingsToken,
                 serverUrl: rcUrl,
@@ -143,21 +108,13 @@ function setupTasks(setupData) {
 
     function doSettings(data) {
         const user = data.user,
-            blogTitle = data.userData.blogTitle,
             serverUrl = data.userData.serverUrl,
             announceToken = data.userData.announce_token,
             settingsToken = data.userData.settings_token,
             context = {context: {user: data.user.id}};
 
-        let userSettings;
-
-        if (!blogTitle || typeof blogTitle !== 'string') {
-            return user;
-        }
-
-        userSettings = [
+        const userSettings = [
             {key: 'server_url', value: serverUrl},
-            {key: 'title', value: blogTitle.trim()},
             {key: 'announce_token', value: announceToken},
             {key: 'settings_token', value: settingsToken},
             {key: 'description', value: common.i18n.t('common.api.authentication.sampleBlogDescription')}
@@ -536,25 +493,19 @@ authentication = {
 
         function processInvitation(invitation) {
             const data = invitation.user[0];
-            return rcUtils.getUser(rcUid, rcToken, data.rc_username)
+            return rcUtils.getUser(data.rc_username)
                 .then((user) => {
                     if (user.success && user.user) {
                         const u = user.user;
                         if (!u.emails){
                             throw new common.errors.NotFoundError({message: common.i18n.t('errors.models.user.rc.noEmail')});
                         }
-                        const email = getVerifiedEmail(u.emails);
                         const role = data.role.name || 'Author';
                         return models.Role.findOne({name: role})
                             .then((r) => {
                                 return models.User.add({
                                     rc_id: u._id,
-                                    rc_username: u.username,
-                                    profile_image: getAvatar(u.username),
                                     slug: u.username,
-                                    email: email,
-                                    name: u.name,
-                                    password: crypto.randomBytes(20).toString('hex'),
                                     roles: [r]
                                 }, localOptions);
                             });

@@ -70,16 +70,10 @@ module.exports = {
     },
     users: {
         id: {type: 'string', maxlength: 24, nullable: false, primary: true},
-        // rc_username can change but rc_id will never change
         rc_id: {type: 'string', maxlength: 17, nullable: false, unique: true},
-        rc_username: {type: 'string', maxlength: 256, nullable: false, unique: true},
-        name: {type: 'string', maxlength: 191, nullable: false},
         slug: {type: 'string', maxlength: 191, nullable: false, unique: true},
         ghost_auth_access_token: {type: 'string', maxlength: 32, nullable: true},
         ghost_auth_id: {type: 'string', maxlength: 24, nullable: true},
-        password: {type: 'string', maxlength: 60, nullable: false},
-        email: {type: 'string', maxlength: 191, nullable: false, unique: true, validations: {isEmail: true}},
-        profile_image: {type: 'string', maxlength: 2000, nullable: true},
         cover_image: {type: 'string', maxlength: 2000, nullable: true},
         bio: {type: 'text', maxlength: 65535, nullable: true, validations: {isLength: {max: 200}}},
         website: {type: 'string', maxlength: 2000, nullable: true, validations: {isEmptyOrURL: true}},
@@ -198,12 +192,6 @@ module.exports = {
         post_id: {type: 'string', maxlength: 24, nullable: false, references: 'posts.id'},
         tag_id: {type: 'string', maxlength: 24, nullable: false, references: 'tags.id'},
         sort_order: {type: 'integer', nullable: false, unsigned: true, defaultTo: 0}
-    },
-    rooms: {
-        id: {type: 'string', maxlength: 24, nullable: false, primary: true},
-        rid: {type: 'string', maxlength: 17, nullable: false, unique: true},
-        name: {type: 'string', maxlength: 191, nullable: false, unique: true},
-        type: {type: 'string', maxlength: 1, nullable: false, validations: {isIn: [['c', 'p']]}}
     },
     apps: {
         id: {type: 'string', maxlength: 24, nullable: false, primary: true},

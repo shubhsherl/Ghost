@@ -1,5 +1,6 @@
 {
     "url": "http://localhost:2368",
+    "rcMongo": "mongodb://localhost:3001",
     "server": {
         "host": "127.0.0.1",
         "port": 2368

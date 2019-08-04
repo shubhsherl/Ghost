@@ -116,11 +116,9 @@ const privateBlogging = {
             url;
 
         if (isVerified) {
-            console.log('ver');
             return next();
         } else {
             return isRCMember(req.headers.cookie).then((verified) => {
-                console.log('rc');
                 if (verified) {
                     const pass = settingsCache.get('password');
                     const hasher = crypto.createHash('sha256');

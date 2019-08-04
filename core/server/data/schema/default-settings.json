@@ -116,14 +116,6 @@
         "settings_token": {
             "defaultValue": "hookid/tokentosyncdb"
         },
-        "room_name": {
-            "defaultValue": "general",
-            "validations": {
-                "isLength": {
-                    "max": 150
-                }
-            }
-        },
         "room_id": {
             "defaultValue": "GENERAL",
             "validations": {

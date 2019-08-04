@@ -2,9 +2,11 @@ const Promise = require('bluebird');
 const request = require('request');
 const {forEach} = require('lodash');
 const models = require('../../../../models');
+const rcMongo = require('../../../../data/rc-mongo');
 const common = require('../../../../lib/common');
 const settingsCache = require('../../../../services/settings/cache');
 const api = require('./api');
+
 
 function getIdToken(req) {
     let id, token;
@@ -17,17 +19,6 @@ function getIdToken(req) {
         }
     });
     return {id, token};
-}
-
-function addRoom(room) {
-    const params = {rid: room.rid, name: room.roomname, type: room.type};
-    models.Room.findOne({rid: room.rid}).then((r) => {
-        if (r) {
-            r.save(params, {method: 'update'});
-        } else {
-            models.Room.add(params);
-        }
-    });
 }
 
 function getOptions(userId) {
@@ -57,46 +48,57 @@ function getpost(model, post, user) {
     return post;
 }
 
-function parseBody(body, type) {
+function parseResult(result, type) {
     const failResult = {success: false, exist: false, created: false};
-    let result;
-
-    if (body) {
-        result = JSON.parse(body);
-    }
     
     if (!result || !result.success) {
         return failResult;
     }
 
     switch (type) {
+        case 'getMe':
+            return {
+                success: true,
+                _id: result._id,
+                name: result.name,
+                username: result.username,
+                emails: result.emails,
+                roles: result.roles,
+            };
         case 'getUser':
             return result;
         case 'validateUser':
-            return {
-                exist: true,
-                uid: result.user._id,
-                username: result.user.username,
-            };
-        case 'validateRoom':
-        case 'validateSelfRoom':
+            return {exist: !!result.user};
+        case 'getRoom':
             const r = result.room || result.discussion;
-            const room = {
+            return room = {
                 exist: result.room ? true : false,
                 created: result.discussion ? true : false,
-                rid: r._id,
+                rid: r._id || r.rid,
                 roomname: r.name,
                 type: r.t
             };
-            if (type === 'validateRoom') {
-                addRoom(room);
-            }
-            return room;
+        case 'validateSelfRoom':
+            const s = result.room;
+            return room = {
+                exist: true,
+                rid: s.rid || s._id,
+                roomname: s.name,
+                type: s.t
+            };
         case 'subscription':
             return {exist: !!result.subscription};
         default:
             return failResult;
     }
+}
+
+function parseBody(body, type) {
+    let result;
+    if (body) {
+        result = JSON.parse(body);
+    }
+    return parseResult(result, type);
 }
 
 module.exports = {
@@ -122,10 +124,15 @@ module.exports = {
         });
     },
 
-    getUser(id, token, username) {
+    // type: getUser, validateUser
+    getUser(username, type = 'getUser') {
         return new Promise((resolve) => {
-            request.get({url: api.buildUserQueryByToken(), form: {username}, headers: api.getHeader(id, token)}, function (e, r, body) {
-                resolve(parseBody(body, 'getUser'));
+            rcMongo.getUser({username}).then((result) => {
+                let user;
+                if (!result.error) {
+                    user = {success: !!result[0], user: result[0]};
+                }
+                resolve(parseResult(user, type));
             });
         });
     },
@@ -133,15 +140,7 @@ module.exports = {
     getMe(id, token) {
         return new Promise((resolve) => {
             request.get({url: api.buildMeUrl(), headers: api.getHeader(id, token)}, function (e, r, body) {
-                resolve(parseBody(body, 'getUser'));
-            });
-        });
-    },
-
-    validateUser(id, token, userName) {
-        return new Promise((resolve) => {
-            request.get({url: api.buildUserQuery(userName), headers: api.getHeader(id, token)}, function (e, r, body) {
-                resolve(parseBody(body, 'validateUser'));
+                resolve(parseBody(body, 'getMe'));
             });
         });
     },
@@ -166,7 +165,7 @@ module.exports = {
     },
 
     // post contains the json of post without embedding the relations
-    collaborate(id, token, rcId, postId, post) {
+    collaborate(id, rcId, postId, post) {
         const failResult = {collaborate: false};
 
         return models.Post.findOne({id: postId, collaborate: 1}, getOptions(post.authors[0])).then((p) => {
@@ -180,7 +179,7 @@ module.exports = {
                     return failResult;
                 }
 
-                return this.validateSubscription(id, token, p.get('room_id'))
+                return this.validateSubscription(id, p.get('room_id'))
                     .then((s) => {
                         if (s.exist) {
                             return models.Post.edit(getpost(p, post, user), {id: postId}).then((p) => {
@@ -194,18 +193,29 @@ module.exports = {
         })
     },
     
-    validateRoom(id, token, roomName) {
+    getRoom(params) {
         return new Promise((resolve) => {
-            request.get({url: api.buildRoomQuery(roomName), headers: api.getHeader(id, token)}, function (e, r, body) {
-                resolve(parseBody(body, 'validateRoom'));
+            rcMongo.getRoom(params).then((result) => {
+                let room;
+                if (!result.error) {
+                    room = {success: !!result[0], room: result[0]};
+                }
+                resolve(parseResult(room, 'getRoom'));
             });
         });
     },
 
     getSelfRoom(id, token, username) {
         return new Promise((resolve) => {
-            request.post({url: api.buildParentRoomQuery(), form: {"username": username}, headers: api.getHeader(id, token)}, function (e, r, body) {
-                resolve(parseBody(body, 'validateSelfRoom'));
+            rcMongo.getSelfSubscription({uid: id}).then((result) => {
+                if (!result.error && !!result[0]) {
+                    const subs = {success: true, room: result[0]};
+                    resolve(parseResult(subs, 'validateSelfRoom'));
+                    return;
+                }
+                request.post({url: api.buildParentRoomQuery(), form: {"username": username}, headers: api.getHeader(id, token)}, function (e, r, body) {
+                    resolve(parseBody(body, 'validateSelfRoom'));
+                });
             });
         });
     },
@@ -221,7 +231,7 @@ module.exports = {
             this.getSelfRoom(id, token, username).then((room) => {
                 if (room.exist) {
                     request.post({url: api.buildDiscussionUrl(), form: {prid: room.rid, t_name: title, t: type}, headers: api.getHeader(id, token)}, function (e, r, body) {
-                        resolve(parseBody(body, 'validateRoom'));
+                        resolve(parseBody(body, 'getRoom'));
                     });
                 } else {
                     resolve(failResult);
@@ -230,10 +240,14 @@ module.exports = {
         });
     },
 
-    validateSubscription(id, token, roomId) {
+    validateSubscription(uid, rid) {
         return new Promise((resolve) => {
-            request.get({url: api.buildSubscriptionQuery(roomId), headers: api.getHeader(id, token)}, function (e, r, body) {
-                resolve(parseBody(body, 'subscription'));
+            rcMongo.getSubscription({rid, uid}).then((result) => {
+                let subs;
+                if (!result.error) {
+                    subs = {success: !!result[0], subscription: result[0]};
+                }
+                resolve(parseResult(subs, 'subscription'));
             });
         });
     }

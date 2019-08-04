@@ -44,7 +44,7 @@ module.exports = (post) => {
         avatar: avatar,
         roomId: post.room_id,
         userId: post.primary_author.rc_id,
-        text: `@here: @${post.primary_author.rc_username} published an article`,
+        text: `@here: New article published`,
         attachments: [
             {
                 title: post.rc_title || post.title,

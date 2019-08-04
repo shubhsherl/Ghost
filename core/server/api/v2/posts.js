@@ -1,4 +1,5 @@
 const models = require('../../models');
+const rcUtils = require('./utils/rc-utils');
 const common = require('../../lib/common');
 const urlService = require('../../services/url');
 const allowedIncludes = ['tags', 'authors', 'authors.roles'];
@@ -72,16 +73,16 @@ module.exports = {
                     }
                     let rid = model.get('room_id');
                     if (rid) {
-                        return models.Room.findOne({rid: rid}).then((r) => {
-                            if (r) {
-                                model.attributes.room_name = r.get('name');
+                        return rcUtils.getRoom({_id: rid}).then((r) => {
+                            if (r.exist) {
+                                model.attributes.room_name = r.roomname;
                             }
                             rid = model.get('discussion_room_id');
                             if (rid) {
-                                return models.Room.findOne({rid: rid}).then((d) => {
-                                    if (d) {
-                                        model.attributes.discussion_room_name = d.get('name');
-                                        model.attributes.discussion_room_type = d.get('type');
+                                return rcUtils.getRoom({_id: rid}).then((d) => {
+                                    if (d.exist) {
+                                        model.attributes.discussion_room_name = d.roomname;
+                                        model.attributes.discussion_room_type = d.type;
                                     }
                                     return model;
                                 });

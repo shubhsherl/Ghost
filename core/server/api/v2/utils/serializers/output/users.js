@@ -52,14 +52,6 @@ module.exports = {
         this.read(...arguments);
     },
 
-    changePassword(models, apiConfig, frame) {
-        debug('changePassword');
-
-        frame.response = {
-            password: [{message: common.i18n.t('notices.api.users.pwdChangedSuccessfully')}]
-        };
-    },
-
     transferOwnership(models, apiConfig, frame) {
         debug('transferOwnership');
 
