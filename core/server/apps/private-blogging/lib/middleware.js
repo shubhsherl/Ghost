@@ -3,11 +3,13 @@ const url = require('url');
 const session = require('cookie-session');
 const crypto = require('crypto');
 const path = require('path');
+const {forEach} = require('lodash');
 const config = require('../../../config');
 const urlService = require('../../../services/url');
 const constants = require('../../../lib/constants');
 const common = require('../../../lib/common');
 const settingsCache = require('../../../services/settings/cache');
+const rcUtils = require('../../../api/v2/utils/rc-utils');
 // routeKeywords.private: 'private'
 const privateRoute = '/private/';
 
@@ -19,6 +21,23 @@ function verifySessionHash(salt, hash) {
     let hasher = crypto.createHash('sha256');
     hasher.update(settingsCache.get('password') + salt, 'utf8');
     return hasher.digest('hex') === hash;
+}
+
+function isRCMember(cookie) {
+    let rcUid, rcToken;
+    if (cookie) {
+        forEach(cookie.split(';'), (v) => {
+            if (v.includes('rc_uid')) {
+                rcUid = v.split('=')[1];
+            }
+            if (v.includes('rc_token')) {
+                rcToken = v.split('=')[1];
+            }
+        });
+    }
+    return rcUtils.getMe(rcUid, rcToken).then((user) => {
+        return user.success;
+    });
 }
 
 function getRedirectUrl(query) {
@@ -43,7 +62,7 @@ const privateBlogging = {
         res.isPrivateBlog = true;
 
         return session({
-            maxAge: constants.ONE_MONTH_MS,
+            maxAge: constants.ONE_MONTH_S,
             signed: false
         })(req, res, next);
     },
@@ -99,9 +118,21 @@ const privateBlogging = {
         if (isVerified) {
             return next();
         } else {
-            url = urlService.utils.urlFor({relativeUrl: privateRoute});
-            url += '?r=' + encodeURIComponent(req.url);
-            return res.redirect(url);
+            return isRCMember(req.headers.cookie).then((verified) => {
+                if (verified) {
+                    const pass = settingsCache.get('password');
+                    const hasher = crypto.createHash('sha256');
+                    const salt = Date.now().toString();
+                    const forward = getRedirectUrl(req.query);
+                    hasher.update(pass + salt, 'utf8');
+                    req.session.token = hasher.digest('hex');
+                    req.session.salt = salt;
+                    return res.redirect(urlService.utils.urlFor({relativeUrl: forward}));
+                }
+                url = urlService.utils.urlFor({relativeUrl: privateRoute});
+                url += '?r=' + encodeURIComponent(req.url);
+                return res.redirect(url);
+            });
         }
     },
 

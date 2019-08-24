@@ -35,6 +35,10 @@ module.exports = {
         return require('./error');
     },
 
+    get header() {
+        return require('./header');
+    },
+
     get context() {
         return require('./context');
     }

@@ -154,14 +154,6 @@ module.exports = function apiRoutes() {
     apiRouter.post('/slack/test', mw.authenticatePrivate, api.http(api.slack.sendTest));
 
     // ## Authentication
-    apiRouter.post('/authentication/passwordreset',
-        brute.globalReset,
-        brute.userReset,
-        api.http(api.authentication.generateResetToken)
-    );
-    apiRouter.put('/authentication/passwordreset', brute.globalBlock, api.http(api.authentication.resetPassword));
-    apiRouter.post('/authentication/invitation', api.http(api.authentication.acceptInvitation));
-    apiRouter.get('/authentication/invitation', api.http(api.authentication.isInvitation));
     apiRouter.post('/authentication/setup', api.http(api.authentication.setup));
     apiRouter.put('/authentication/setup', mw.authenticatePrivate, api.http(api.authentication.updateSetup));
     apiRouter.get('/authentication/setup', api.http(api.authentication.isSetup));

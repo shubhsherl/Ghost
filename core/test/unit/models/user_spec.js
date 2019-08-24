@@ -63,8 +63,38 @@ describe('Unit: models/user', function () {
                     });
             });
 
-            it('email cannot be blank', function () {
+            it('rc_id cannot be blank', function () {
                 let data = {name: 'name'};
+                sinon.stub(models.User, 'findOne').resolves(null);
+
+                return models.User.add(data)
+                    .then(function () {
+                        throw new Error('expected ValidationError');
+                    })
+                    .catch(function (err) {
+                        err.should.be.an.Array();
+                        (err[0] instanceof common.errors.ValidationError).should.eql(true);
+                        err[0].message.should.match(/users\.rc_id/);
+                    });
+            });
+
+            it('rc_username cannot be blank', function () {
+                let data = {name: 'name', rc_id: 'AA4fsDFdswwd23dyt'};
+                sinon.stub(models.User, 'findOne').resolves(null);
+
+                return models.User.add(data)
+                    .then(function () {
+                        throw new Error('expected ValidationError');
+                    })
+                    .catch(function (err) {
+                        err.should.be.an.Array();
+                        (err[0] instanceof common.errors.ValidationError).should.eql(true);
+                        err[0].message.should.match(/users\.rc_username/);
+                    });
+            });
+
+            it('email cannot be blank', function () {
+                let data = {name: 'name', rc_id: 'AA4fsDFdswwd23dyt', rc_username: 'name'};
                 sinon.stub(models.User, 'findOne').resolves(null);
 
                 return models.User.add(data)
@@ -138,14 +168,18 @@ describe('Unit: models/user', function () {
     });
 
     describe('permissible', function () {
-        function getUserModel(id, role, roleId) {
+        function getUserModel(id, role, parentId, roleId) {
             var hasRole = sinon.stub();
+            var isParent = sinon.stub();
 
             hasRole.withArgs(role).returns(true);
+            isParent.withArgs(parentId).returns(true);
 
             return {
                 id: id,
                 hasRole: hasRole,
+                isParent: isParent,
+                related: sinon.stub().returns([{name: role, id: roleId}]),
                 related: sinon.stub().returns([{name: role, id: roleId}]),
                 get: sinon.stub().returns(id)
             };
@@ -344,24 +378,30 @@ describe('Unit: models/user', function () {
                 });
             });
 
-            it('can edit author', function () {
-                var mockUser = getUserModel(3, 'Author'),
+            it('can edit own contributor', function () {
+                var mockUser = getUserModel(3, 'Contributor', 2),
                     context = {user: 2};
 
                 return models.User.permissible(mockUser, 'edit', context, {}, testUtils.permissions.editor, true, true, true).then(() => {
                     should(mockUser.hasRole.called).be.true();
+                    should(mockUser.isParent.calledOnce).be.true();
                     should(mockUser.get.calledOnce).be.true();
                 });
             });
 
-            it('can edit contributor', function () {
-                var mockUser = getUserModel(3, 'Contributor'),
+            it('can\'t edit others contributor', function (done) {
+                var mockUser = getUserModel(3, 'Contributor', 1),
                     context = {user: 2};
 
-                return models.User.permissible(mockUser, 'edit', context, {}, testUtils.permissions.editor, true, true, true).then(() => {
-                    should(mockUser.hasRole.called).be.true();
-                    should(mockUser.get.calledOnce).be.true();
-                });
+                models.User.permissible(mockUser, 'edit', context, {}, testUtils.permissions.editor, true, true, true).then(() => {
+                        done(new Error('Permissible function should have errored'));
+                    }).catch((error) => {
+                        error.should.be.an.instanceof(common.errors.NoPermissionError);
+                        should(mockUser.isParent.calledOnce).be.true();
+                        should(mockUser.hasRole.called).be.true();
+                        should(mockUser.get.calledOnce).be.true();
+                        done();
+                    });
             });
 
             it('can destroy self', function () {
@@ -402,24 +442,30 @@ describe('Unit: models/user', function () {
                 });
             });
 
-            it('can destroy an author', function () {
-                var mockUser = getUserModel(3, 'Author'),
+            it('can destroy own contributor', function () {
+                var mockUser = getUserModel(3, 'Contributor', 2),
                     context = {user: 2};
 
                 return models.User.permissible(mockUser, 'destroy', context, {}, testUtils.permissions.editor, true, true, true).then(() => {
                     should(mockUser.hasRole.called).be.true();
+                    should(mockUser.isParent.calledOnce).be.true();
                     should(mockUser.get.calledOnce).be.true();
                 });
             });
 
-            it('can destroy a contributor', function () {
-                var mockUser = getUserModel(3, 'Contributor'),
+            it('can\'t destroy others contributor', function (done) {
+                var mockUser = getUserModel(3, 'Contributor', 1),
                     context = {user: 2};
 
-                return models.User.permissible(mockUser, 'destroy', context, {}, testUtils.permissions.editor, true, true, true).then(() => {
-                    should(mockUser.hasRole.called).be.true();
-                    should(mockUser.get.calledOnce).be.true();
-                });
+                models.User.permissible(mockUser, 'destroy', context, {}, testUtils.permissions.editor, true, true, true).then(() => {
+                        done(new Error('Permissible function should have errored'));
+                    }).catch((error) => {
+                        error.should.be.an.instanceof(common.errors.NoPermissionError);
+                        should(mockUser.isParent.calledOnce).be.true();
+                        should(mockUser.hasRole.called).be.true();
+                        should(mockUser.get.calledOnce).be.true();
+                        done();
+                    });
             });
         });
     });

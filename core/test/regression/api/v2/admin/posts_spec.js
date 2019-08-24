@@ -131,6 +131,7 @@ describe('Posts API', function () {
                 .send({
                     posts: [{
                         title: '',
+                        authors: [request.user]
                     }]
                 })
                 .expect('Content-Type', /json/)

@@ -73,6 +73,17 @@ const author = (attrs, frame) => {
     return attrs;
 };
 
+
+const parent = (attrs, frame) => {
+       if (attrs.parents) {
+           attrs.parent_id = attrs.parents[0].id;
+           delete attrs.parents;
+       }
+
+    return attrs;
+};
+
+
 const post = (attrs, frame) => {
     if (localUtils.isContentAPI(frame)) {
         // @TODO: https://github.com/TryGhost/Ghost/issues/10335
@@ -145,4 +156,5 @@ const action = (attrs) => {
 module.exports.post = post;
 module.exports.tag = tag;
 module.exports.author = author;
+module.exports.parent = parent;
 module.exports.action = action;

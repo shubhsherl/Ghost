@@ -15,6 +15,7 @@ const config = require('./config');
 const common = require('./lib/common');
 const migrator = require('./data/db/migrator');
 const urlService = require('./services/url');
+const rcMongo = require('./data/rc-mongo');
 let parentApp;
 
 function initialiseServices() {
@@ -29,6 +30,7 @@ function initialiseServices() {
         apps = require('./services/apps'),
         xmlrpc = require('./services/xmlrpc'),
         slack = require('./services/slack'),
+        announcement = require('./services/announcement'),
         webhooks = require('./services/webhooks'),
         scheduling = require('./adapters/scheduling');
 
@@ -39,6 +41,7 @@ function initialiseServices() {
         permissions.init(),
         xmlrpc.listen(),
         slack.listen(),
+        announcement.listen(),
         webhooks.listen(),
         apps.init(),
         scheduling.init({
@@ -153,7 +156,7 @@ const minimalRequiredSetupToStartGhost = (dbState) => {
 const isDatabaseInitialisationRequired = () => {
     const db = require('./data/db/connection');
     let dbState;
-
+    rcMongo.dbInit();
     return migrator.getState()
         .then((state) => {
             dbState = state;

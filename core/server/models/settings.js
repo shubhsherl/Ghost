@@ -4,6 +4,7 @@ const Promise = require('bluebird'),
     crypto = require('crypto'),
     keypair = require('keypair'),
     ghostBookshelf = require('./base'),
+    {ApiKey} = require('./api-key'),
     common = require('../lib/common'),
     validation = require('../data/validation'),
     internalContext = {context: {internal: true}};
@@ -210,7 +211,18 @@ Settings = ghostBookshelf.Model.extend({
                     var isMissingFromDB = usedKeys.indexOf(defaultSettingKey) === -1;
                     if (isMissingFromDB) {
                         defaultSetting.value = defaultSetting.defaultValue;
-                        insertOperations.push(Settings.forge(defaultSetting).save(null, options));
+                        if (defaultSetting.key === 'ghost_foot') {
+                            insertOperations.push(
+                                ApiKey.findOne({type: 'content'}).then((key) => {
+                                    if (key) {
+                                        defaultSetting.value = defaultSetting.value.replace('API_KEY', key.get('secret'));
+                                    }
+                                    Settings.forge(defaultSetting).save(null, options)
+                                })
+                            );
+                        } else {
+                            insertOperations.push(Settings.forge(defaultSetting).save(null, options));
+                        }
                     }
                 });
 

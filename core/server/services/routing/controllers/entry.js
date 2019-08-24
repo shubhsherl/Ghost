@@ -13,7 +13,7 @@ const debug = require('ghost-ignition').debug('services:routing:controllers:entr
 module.exports = function entryController(req, res, next) {
     debug('entryController', res.routerOptions);
 
-    return helpers.entryLookup(req.path, res.routerOptions, res.locals)
+    return helpers.entryLookup(req.path, res.routerOptions, res.locals, helpers.header(req.headers))
         .then(function then(lookup) {
             // Format data 1
             const entry = lookup ? lookup.entry : false;

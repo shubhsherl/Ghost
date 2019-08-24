@@ -1,4 +1,5 @@
 const models = require('../../models');
+const rcUtils = require('./utils/rc-utils');
 const common = require('../../lib/common');
 const urlService = require('../../services/url');
 const allowedIncludes = ['tags', 'authors', 'authors.roles'];
@@ -70,7 +71,25 @@ module.exports = {
                             message: common.i18n.t('errors.api.posts.postNotFound')
                         });
                     }
-
+                    let rid = model.get('room_id');
+                    if (rid) {
+                        return rcUtils.getRoom({_id: rid}).then((r) => {
+                            if (r.exist) {
+                                model.attributes.room_name = r.roomname;
+                            }
+                            rid = model.get('discussion_room_id');
+                            if (rid) {
+                                return rcUtils.getRoom({_id: rid}).then((d) => {
+                                    if (d.exist) {
+                                        model.attributes.discussion_room_name = d.roomname;
+                                        model.attributes.discussion_room_type = d.type;
+                                    }
+                                    return model;
+                                });
+                            }
+                            return model;
+                        });
+                    }
                     return model;
                 });
         }

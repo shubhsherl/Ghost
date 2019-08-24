@@ -131,7 +131,7 @@ describe('Update Check', function () {
                 data.database_type.should.match(/sqlite3|mysql/);
                 data.blog_id.should.be.a.String();
                 data.blog_id.should.not.be.empty();
-                data.theme.should.be.equal('casper');
+                data.theme.should.be.equal('Mapache');
                 data.blog_created_at.should.be.a.Number();
                 data.user_count.should.be.above(0);
                 data.post_count.should.be.above(0);

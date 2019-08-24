@@ -204,8 +204,9 @@ const pipeline = (apiController, apiUtils, apiType) => {
             if (!(options instanceof shared.Frame)) {
                 frame = new shared.Frame({
                     body: data,
-                    options: _.omit(options, 'context'),
-                    context: options.context || {}
+                    options: _.omit(options, 'context', 'original'),
+                    context: options.context || {},
+                    ...options.original
                 });
 
                 frame.configure({

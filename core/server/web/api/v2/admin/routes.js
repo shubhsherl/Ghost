@@ -78,7 +78,6 @@ module.exports = function apiRoutes() {
     router.get('/users/email/:email', mw.authAdminApi, http(apiv2.users.read));
     // Public call: if user exist, based on rc_uid, and rc_token
     router.get('/userexist', http(apiv2.users.exist));
-    router.put('/users/password', mw.authAdminApi, http(apiv2.users.changePassword));
     router.put('/users/owner', mw.authAdminApi, http(apiv2.users.transferOwnership));
     router.put('/users/:id', mw.authAdminApi, http(apiv2.users.edit));
     router.del('/users/:id', mw.authAdminApi, http(apiv2.users.destroy));
@@ -184,15 +183,7 @@ module.exports = function apiRoutes() {
     router.del('/session', mw.authAdminApi, api.http(apiv2.session.delete));
 
     // ## Authentication
-    router.post('/authentication/passwordreset',
-        shared.middlewares.brute.globalReset,
-        shared.middlewares.brute.userReset,
-        api.http(api.authentication.generateResetToken)
-    );
-    router.put('/authentication/passwordreset', shared.middlewares.brute.globalBlock, api.http(api.authentication.resetPassword));
-    router.post('/authentication/invitation', api.http(api.authentication.acceptInvitation));
     router.post('/authentication/adduser', api.http(api.authentication.addUser));
-    router.get('/authentication/invitation', api.http(api.authentication.isInvitation));
     router.post('/authentication/setup', api.http(api.authentication.setup));
     router.put('/authentication/setup', mw.authAdminApi, api.http(api.authentication.updateSetup));
     router.get('/authentication/setup', api.http(api.authentication.isSetup));
@@ -207,13 +198,18 @@ module.exports = function apiRoutes() {
     );
 
     // ## Invites
-    router.get('/invites', mw.authAdminApi, http(apiv2.invites.browse));
-    router.get('/invites/:id', mw.authAdminApi, http(apiv2.invites.read));
-    router.post('/invites', mw.authAdminApi, http(apiv2.invites.add));
-    router.del('/invites/:id', mw.authAdminApi, http(apiv2.invites.destroy));
+    // router.get('/invites', mw.authAdminApi, http(apiv2.invites.browse));
+    // router.get('/invites/:id', mw.authAdminApi, http(apiv2.invites.read));
+    // router.post('/invites', mw.authAdminApi, http(apiv2.invites.add));
+    // router.del('/invites/:id', mw.authAdminApi, http(apiv2.invites.destroy));
+
+    // ## RC Incoming Webhook
+    router.post('/rhooks/:token', http(apiv2.rhooks.callbacks));
 
     // ## RC Api
-    router.get('/rcapi', mw.authAdminApi, http(apiv2.rcapi.browse)); // No need for checking persmissions
+    router.get('/rcapi', mw.authAdminApi, http(apiv2.rcapi.browse));
+    router.post('/rcapi/discussion', mw.authAdminApi, http(apiv2.rcapi.discussion));
+    router.post('/rcapi/collaborate', mw.authAdminApi, http(apiv2.rcapi.collaborate));
 
     // ## Redirects (JSON based)
     router.get('/redirects/json', mw.authAdminApi, http(apiv2.redirects.download));

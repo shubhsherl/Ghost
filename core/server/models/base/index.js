@@ -533,7 +533,7 @@ ghostBookshelf.Model = ghostBookshelf.Model.extend({
     contextUser: function contextUser(options) {
         options = options || {};
         options.context = options.context || {};
-
+        
         if (options.context.user || ghostBookshelf.Model.isExternalUser(options.context.user)) {
             return options.context.user;
         } else if (options.context.integration) {

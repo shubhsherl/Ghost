@@ -9,6 +9,7 @@ const htmlToText = require('html-to-text');
 const ghostBookshelf = require('./base');
 const config = require('../config');
 const converters = require('../lib/mobiledoc/converters');
+const dbUtils = require('./base/dbUtils');
 const relations = require('./relations');
 const MOBILEDOC_REVISIONS_COUNT = 10;
 const ALL_STATUSES = ['published', 'draft', 'scheduled'];
@@ -761,7 +762,7 @@ Post = ghostBookshelf.Model.extend({
      * @extends ghostBookshelf.Model.findOne to handle post status
      * **See:** [ghostBookshelf.Model.findOne](base.js.html#Find%20One)
      */
-    findOne: function findOne(data = {}, options = {}) {
+    findOne: async function findOne(data = {}, options = {}) {
         // @TODO: remove when we drop v0.1
         if (!options.filter && !data.status) {
             data.status = 'published';
@@ -771,7 +772,9 @@ Post = ghostBookshelf.Model.extend({
             delete data.status;
         }
 
-        return ghostBookshelf.Model.findOne.call(this, data, options);
+        const model = await ghostBookshelf.Model.findOne.call(this, data, options);
+        
+        return dbUtils.authors(model);
     },
 
     /**

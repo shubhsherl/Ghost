@@ -4,6 +4,7 @@ const moment = require('moment');
 const DataGenerator = require('./fixtures/data-generator');
 const config = require('../../server/config');
 const common = require('../../server/lib/common');
+const rcUtils = require('./rc-utils');
 const sequence = require('../../server/lib/promise/sequence');
 const host = config.get('server').host;
 const port = config.get('server').port;
@@ -88,7 +89,7 @@ const login = (request, API_URL) => {
     if (!request.user) {
         request.user = DataGenerator.Content.users[0];
     }
-
+    rcUtils.buildMe();
     return new Promise(function (resolve, reject) {
         request.post(API_URL)
             .set('Origin', config.get('url'))
@@ -96,6 +97,8 @@ const login = (request, API_URL) => {
                 grant_type: 'password',
                 username: request.user.email,
                 password: 'Sl1m3rson99',
+                rc_id: request.user.rc_id,
+                rc_token: rcUtils.getTokenById({id: request.user.rc_id, uname: request.user.rc_username}),
                 client_id: 'ghost-admin',
                 client_secret: 'not_available'
             })

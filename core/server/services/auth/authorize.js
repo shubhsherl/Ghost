@@ -69,7 +69,7 @@ const authorize = {
     authorizeAdminApi(req, res, next) {
         const hasUser = req.user && req.user.id;
         const hasApiKey = req.api_key && req.api_key.id;
-
+        
         if (hasUser || hasApiKey) {
             return next();
         } else {

@@ -1,5 +1,6 @@
 {
     "url": "http://127.0.0.1:2369",
+    "server_url": "http://localhost:4000",
     "database": {
         "client": "sqlite3",
         "connection": {
