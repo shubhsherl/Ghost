@@ -412,9 +412,9 @@ module.exports.extendModel = function extendModel(Post, Posts, ghostBookshelf) {
                 hasUserPermission = isOwner();
             } else if (isContributor && isDestroy) {
                 hasUserPermission = isPrimaryAuthor();
-            } else if (isAuthor && isEdit) {
+            } else if (isEdit) {
                 hasUserPermission = isCoAuthor() && !isChanging('author_id') && !isChangingAuthors();
-            } else if (isAuthor && isAdd) {
+            } else if (isAdd) {
                 hasUserPermission = isOwner();
             } else if (postModel) {
                 hasUserPermission = hasUserPermission || isPrimaryAuthor();
@@ -435,7 +435,7 @@ module.exports.extendModel = function extendModel(Post, Posts, ghostBookshelf) {
                     // @TODO: for now we simply re-use the new concept of `excludedAttrs`
                     // We only check the primary author of `authors`, any other change will be ignored.
                     // By this we can deprecate `author_id` more easily.
-                    if (isContributor || isAuthor) {
+                    if (isContributor && isEdit) {
                         return {
                             excludedAttrs: ['authors'].concat(excludedAttrs)
                         };

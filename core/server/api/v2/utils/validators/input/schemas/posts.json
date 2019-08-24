@@ -19,9 +19,21 @@
                 },
                 "room_name": {
                     "type": ["string", "null"],
-                    "maxLength": 980
+                    "maxLength": 256
                 },
-                "to_announce": {
+                "room_id": {
+                    "type": ["string", "null"],
+                    "maxLength": 17
+                },
+                "discussion_room_id": {
+                    "type": ["string", "null"],
+                    "maxLength": 17
+                },
+                "discussion_room_name": {
+                    "type": ["string", "null"],
+                    "maxLength": 256
+                },
+                "announce": {
                     "type": "boolean"
                 },
                 "mobiledoc": {
@@ -103,6 +115,19 @@
                     "maxLength": 300
                 },
                 "twitter_description": {
+                    "type": ["string", "null"],
+                    "maxLength": 500
+                },
+                "rc_image": {
+                    "type": ["string", "null"],
+                    "format": "uri-reference",
+                    "maxLength": 2000
+                },
+                "rc_title": {
+                    "type": ["string", "null"],
+                    "maxLength": 300
+                },
+                "rc_description": {
                     "type": ["string", "null"],
                     "maxLength": 500
                 },

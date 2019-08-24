@@ -51,6 +51,10 @@ module.exports = {
         return shared.pipeline(require('./rcapi'), localUtils);
     },
 
+    get rhooks() {
+        return shared.pipeline(require('./rhooks'), localUtils);
+    },
+
     get mail() {
         return shared.pipeline(require('./mail'), localUtils);
     },

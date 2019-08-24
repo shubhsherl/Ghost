@@ -120,7 +120,7 @@ const authenticate = (req, res, next) => {
             req.user = null;
             return rcUtils.createSession(req)
                 .then((req) => {
-                    if(req.user) {
+                    if (req.user) {
                         getSession(req, res, function (err) {
                             if (err) {
                                 return next(err);

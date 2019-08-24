@@ -43,6 +43,10 @@ const forPost = (id, attrs, frame) => {
         attrs.twitter_image = urlService.utils.urlFor('image', {image: attrs.twitter_image}, true);
     }
 
+    if (attrs.rc_image) {
+        attrs.rc_image = urlService.utils.urlFor('image', {image: attrs.rc_image}, true);
+    }
+
     if (attrs.canonical_url) {
         attrs.canonical_url = urlService.utils.relativeToAbsolute(attrs.canonical_url);
     }
