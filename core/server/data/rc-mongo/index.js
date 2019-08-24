@@ -1,7 +1,7 @@
 var MongoClient = require('mongodb').MongoClient,
     config = require('../../config');
 
-let db;
+let client, db;
 
 const collection = {
     db: 'meteor',
@@ -10,25 +10,52 @@ const collection = {
     subscription: 'rocketchat_subscription',
 };
 
-INIT_ERROR = {error: 'DB not connected or initialized'};
+const options = {
+    useNewUrlParser: true,
+    reconnectInterval: 10000,
+    reconnectTries: 10,
+    autoReconnect: true
+}
+
+INIT_ERROR = { error: 'DB not connected or initialized' };
 
 module.exports = {
-    dbInit() {
-        MongoClient.connect(config.get('rcMongo'), function (err, client) {
-            if (err) throw err;
+    async dbInit() {
+        client = new MongoClient(config.get('rcMongo'), options);
+        
+        try {
+            await client.connect();
             db = client.db(collection.db);
+        } catch (error) {
+            console.log(error);
+        }
+
+        db.on('close', function (error) {
+            db = null;
         });
+    },
+
+    async dbReinit(callback, params) {
+        try {
+            await client.open();
+            db = client.db(collection.db);
+            return callback(params);
+        } catch (error) {
+            db = null;
+            console.log(error);
+            return INIT_ERROR;
+        }
     },
 
     // getRoom by id or by room name
     async getRoom(params) {
         if (!db) {
-            return INIT_ERROR;
+            return this.dbReinit(this.getRoom, params);
         }
 
         const {_id, name} = params;
         
-        if(!_id && !name) {
+        if (!_id && !name) {
             return {error: '_id or name is required'};
         }
 
@@ -39,12 +66,12 @@ module.exports = {
     // getUser by username or id
     async getUser(params) {
         if (!db) {
-            return INIT_ERROR;
+            return this.dbReinit(this.getUser, params);
         }
 
         const {_id, username} = params;
         
-        if(!_id && !username) {
+        if (!_id && !username) {
             return {error: 'uid or username is required'};
         }
         
@@ -56,12 +83,12 @@ module.exports = {
     // getSubscription by uid and rid
     async getSubscription(params) {
         if (!db) {
-            return INIT_ERROR;
+            return this.dbReinit(this.getSubscription, params);
         }
 
         const {uid, rid} = params;
         
-        if(!uid || !rid) {
+        if (!uid || !rid) {
             return {error: 'uid and rid is required'};
         }
 
@@ -72,12 +99,12 @@ module.exports = {
         // getSubscription by uid and rid
     async getSelfSubscription(params) {
         if (!db) {
-            return INIT_ERROR;
+            return this.dbReinit(this.getSelfSubscription, params);
         }
 
         const {uid} = params;
         
-        if(!uid) {
+        if (!uid) {
             return {error: 'uid is required'};
         }
 
