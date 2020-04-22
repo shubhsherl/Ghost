@@ -1,30 +1,9 @@
 const Promise = require('bluebird');
 const request = require('request');
-const { forEach } = require('lodash');
-const models = require('../../../models');
-const auth = require('../../../services/auth');
-const settingsCache = require('../../../services/settings/cache');
-const common = require('../../../lib/common');
-
-function getRCUrl() {
-    return settingsCache.get('server_url');
-}
-
-function buildMeUrl(url = null) {
-    const base = url || getRCUrl();
-    return base + '/api/v1/me';
-}
-
-function buildUserQuery(username) {
-    return getRCUrl() + '/api/v1/users.info?' + `username=${username}`;
-}
-
-function getHeader(id, token) {
-    return {
-        'X-Auth-Token': token,
-        'X-User-Id': id
-    };
-}
+const {forEach} = require('lodash');
+const models = require('../../../../models');
+const common = require('../../../../lib/common');
+const api = require('./api');
 
 function getIdToken(req) {
     let id, token;
@@ -41,7 +20,7 @@ module.exports = {
     checkAdmin(url, id, token) {
         let user;
         return new Promise((resolve) => {
-            request.get({ url: buildMeUrl(url), headers: getHeader(id, token) }, function (e, r, body) {
+            request.get({ url: api.buildMeUrl(url), headers: api.getHeader(id, token) }, function (e, r, body) {
                 user = JSON.parse(body);
                 if (user.success) {
                     if (user.roles.indexOf('admin') == -1) {
@@ -63,7 +42,7 @@ module.exports = {
     getUser(id, token, username) {
         let user;
         return new Promise((resolve) => {
-            request.get({ url: buildUserQuery(username), headers: getHeader(id, token) }, function (e, r, body) {
+            request.get({ url: api.buildUserQuery(username), headers: api.getHeader(id, token) }, function (e, r, body) {
                 let result;
                 if (body)
                     result = JSON.parse(body);
@@ -82,7 +61,7 @@ module.exports = {
     getMe(id, token) {
         let user;
         return new Promise((resolve) => {
-            request.get({ url: buildMeUrl(), headers: getHeader(id, token) }, function (e, r, body) {
+            request.get({ url: api.buildMeUrl(), headers: api.getHeader(id, token) }, function (e, r, body) {
                 let result;
                 if (body)
                     result = JSON.parse(body);
@@ -101,19 +80,21 @@ module.exports = {
     validateUser(id, token, userName) {
         let user;
         return new Promise((resolve) => {
-            request.get({ url: buildUserQuery(userName), headers: getHeader(id, token) }, function (e, r, body) {
+            request.get({ url: api.buildUserQuery(userName), headers: api.getHeader(id, token) }, function (e, r, body) {
                 let result;
                 if (body)
                     result = JSON.parse(body);
                 if (result && result.success) {
                     u = result.user;
                     user = {
+                        type: 'rc_users',
                         exist: true,
-                        rid: u._id,
+                        uid: u._id,
                         username: u.username,
                     };
                 } else {
                     user = {
+                        type: 'rc_users',
                         exist: false,
                     };
                 }
@@ -138,6 +119,34 @@ module.exports = {
                     req.user = user;
                     return req;
                 });
+            });
+    },
+    
+    validateRoom(id, token, roomName) {
+        let room;
+        return new Promise((resolve) => {
+            request.get({ url: api.buildRoomQuery(roomName), headers: api.getHeader(id, token) }, function (e, r, body) {
+                let result;
+
+                if (body)
+                    result = JSON.parse(body);
+
+                if (result && result.success) {
+                    r = result.room;
+                    room = {
+                        type: 'rc_rooms',
+                        exist: true,
+                        rid: r._id,
+                        roomname: r.name,
+                    };
+                } else {
+                    room = {
+                        type: 'rc_rooms',
+                        exist: false,
+                    };
+                }
+                resolve(room);
+            });
         });
     }
 };

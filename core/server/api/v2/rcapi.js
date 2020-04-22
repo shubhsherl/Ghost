@@ -7,7 +7,8 @@ module.exports = {
     browse: {
         options: [
             'include',
-            'name',
+            'uname',
+            'rname',
             'page',
             'limit',
             'fields',
@@ -22,12 +23,17 @@ module.exports = {
         },
         permissions: false,
         query(frame) {
-            let username = frame.options.name;
-
-            return rcUtils.validateUser(frame.original.rc_uid, frame.original.rc_token, username)
-                .then((user) =>{
-                    return user;
-                })
+            let username = frame.options.uname;
+            let roomname = frame.options.rname;
+            if (username)
+                return rcUtils.validateUser(frame.original.rc_uid, frame.original.rc_token, username)
+                    .then((user) => {
+                        return user;
+                    });
+            return rcUtils.validateRoom(frame.original.rc_uid, frame.original.rc_token, roomname)
+                .then((room) => {
+                    return room;
+                });
         }
     }
 };

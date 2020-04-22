@@ -29,6 +29,7 @@ function initialiseServices() {
         apps = require('./services/apps'),
         xmlrpc = require('./services/xmlrpc'),
         slack = require('./services/slack'),
+        announcement = require('./services/announcement');
         webhooks = require('./services/webhooks'),
         scheduling = require('./adapters/scheduling');
 
@@ -39,6 +40,7 @@ function initialiseServices() {
         permissions.init(),
         xmlrpc.listen(),
         slack.listen(),
+        announcement.listen(),
         webhooks.listen(),
         apps.init(),
         scheduling.init({

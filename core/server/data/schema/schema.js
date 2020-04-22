@@ -13,7 +13,7 @@ module.exports = {
         id: {type: 'string', maxlength: 24, nullable: false, primary: true},
         uuid: {type: 'string', maxlength: 36, nullable: false, validations: {isUUID: true}},
         room_id: {type: 'string', maxlength: 17, nullable: true, unique: false},
-        room_name: {type: 'string', maxlength: 980, nullable: true, unique: false},
+        room_name: {type: 'string', maxlength: 256, nullable: true, unique: false},
         title: {type: 'string', maxlength: 2000, nullable: false, validations: {isLength: {max: 255}}},
         slug: {type: 'string', maxlength: 191, nullable: false, unique: true},
         mobiledoc: {type: 'text', maxlength: 1000000000, fieldtype: 'long', nullable: true},
@@ -23,6 +23,7 @@ module.exports = {
         feature_image: {type: 'string', maxlength: 2000, nullable: true},
         featured: {type: 'bool', nullable: false, defaultTo: false},
         page: {type: 'bool', nullable: false, defaultTo: false},
+        announce: {type: 'bool', nullable: true, defaultTo: false},
         status: {type: 'string', maxlength: 50, nullable: false, defaultTo: 'draft'},
         locale: {type: 'string', maxlength: 6, nullable: true},
         visibility: {
@@ -59,6 +60,9 @@ module.exports = {
         twitter_image: {type: 'string', maxlength: 2000, nullable: true},
         twitter_title: {type: 'string', maxlength: 300, nullable: true},
         twitter_description: {type: 'string', maxlength: 500, nullable: true},
+        rc_image: {type: 'string', maxlength: 2000, nullable: true},
+        rc_title: {type: 'string', maxlength: 300, nullable: true},
+        rc_description: {type: 'string', maxlength: 500, nullable: true},
         custom_template: {type: 'string', maxlength: 100, nullable: true},
         canonical_url: {type: 'text', maxlength: 2000, nullable: true}
     },
